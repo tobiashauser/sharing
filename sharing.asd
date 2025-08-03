@@ -3,5 +3,5 @@
   :author "Tobias Hauser"
   :license "MIT"
   :depends-on (:hunchentoot)
-  :components (:file "main")
+  :components ((:file "main"))
   :description "A small website to share files and documents.")
