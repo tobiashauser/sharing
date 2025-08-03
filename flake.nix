@@ -27,5 +27,5 @@
 }
 
 # Local Variables:
-# eval: (add-hook 'after-save-hook #'envrc-reload)
+# eval: (add-hook 'after-save-hook #'envrc-reload nil t)
 # End:
