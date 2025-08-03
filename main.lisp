@@ -1,2 +1,4 @@
-(load (sb-ext:posix-getenv "ASDF"))
-;; (asdf:load-system 'alexandria)
+(defpackage sharing
+  (:use :cl))
+
+(in-package :hsaring)
