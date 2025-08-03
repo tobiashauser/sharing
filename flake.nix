@@ -19,6 +19,7 @@
           devShell = with pkgs; mkShell {
             packages = [
               lisp
+              bun
             ];
           };
         }
