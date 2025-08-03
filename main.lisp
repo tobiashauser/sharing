@@ -3,4 +3,3 @@
 
 (in-package :sharing)
 
-(load (sb-ext:posix-getenv "ASDF"))
