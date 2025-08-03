@@ -25,3 +25,7 @@
         }
     );
 }
+
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'envrc-reload)
+# End:
