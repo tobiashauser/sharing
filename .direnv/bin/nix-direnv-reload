@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -e
-if [[ ! -d "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92" ]]; then
+if [[ ! -d "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing" ]]; then
   echo "Cannot find source directory; Did you move it?"
-  echo "(Looking for "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92")"
+  echo "(Looking for "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing")"
   echo 'Cannot force reload with this script - use "direnv reload" manually and then try again'
   exit 1
 fi
 
 # rebuild the cache forcefully
-_nix_direnv_force_reload=1 direnv exec "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92" true
+_nix_direnv_force_reload=1 direnv exec "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing" true
 
 # Update the mtime for .envrc.
 # This will cause direnv to reload again - but without re-building.
-touch "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92/.envrc"
+touch "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing/.envrc"
 
 # Also update the timestamp of whatever profile_rc we have.
 # This makes sure that we know we are up to date.
-touch -r "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92/.envrc" "/Users/tobiashauser/Desktop/.sessions/common-lisp/2025-08-03/b78df23f2cef196680422d43a75aad6ebf220e92/.direnv"/*.rc
+touch -r "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing/.envrc" "/Users/tobiashauser/Documents/scratchbook/common-lisp/sharing/.direnv"/*.rc
