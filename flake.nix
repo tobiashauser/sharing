@@ -12,6 +12,7 @@
         pkgs = import nixpkgs { inherit system; };
         lisp = pkgs.sbcl.withPackages (ps: with ps; [
           # Add packages here:
+          hunchentoot
         ]);
       in
         {
