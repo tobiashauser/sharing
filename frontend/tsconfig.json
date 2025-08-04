@@ -1,20 +1,13 @@
 {
+    "files": [],
+    "references": [
+	{ "path": "./tsconfig.app.json" },
+	{ "path": "./tsconfig.node.json" }
+    ],
     "compilerOptions": {
 	"baseUrl": ".",
 	"paths": {
-	    "~/*": [
-		"./scr/*"
-	    ]
-	},
-	"target": "ESNext",
-	"module": "ESNext",
-	"moduleResolution": "bundler",
-	"allowSyntheticDefaultImports": true,
-	"esModuleInterop": true,
-	"jsx": "preserve",
-	"jsxImportSource": "solid-js",
-	"types": ["vite/client"],
-	"noEmit": true,
-	"isolatedModules": true
+	    "@/*": ["./src/*"]
+	}
     }
 }
