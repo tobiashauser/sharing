@@ -27,13 +27,17 @@ export default function App() {
   
   return (
     <>
-      <DropZone debug={false} className="h-screen"
+      <DropZone
+	className="h-dvh"
+	debug={true} 
 	onDragEnter={handleDragEnter}
 	onDragOver={handleDragOver}
 	onDragLeave={handleDragLeave}
 	onDrop={handleDrop}>
 	<div className="flex flex-col items-center">
-	  <DropArea debug={false}
+	  <DropArea
+	    className="h-40 w-2/3 max-w-md mt-4"
+	    debug={false}
 	    onClick={openFileDialog}
 	    inputProps={getInputProps()}
 	    isDragging={isDragging} />

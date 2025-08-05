@@ -2,6 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+import { FileUpIcon } from "lucide-react"
+
 interface DropZoneInterface extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
   debug?: boolean
@@ -45,17 +47,33 @@ export function DropArea({ className, debug, isDragging, inputProps, ...props }:
   return (
     <div
       className={cn(
-	"hover:bg-accent/50 cursor-pointer",
-	"border rounded-xl",
-	isDragging ? "border-sky-100 bg-sky-50/50 shadow-xs" : "border-dashed border-input",
-	"min-h-40 w-2/3 max-w-md",
-	"transition-all",
+	"grid",
+	"rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]",
 	className,
-	debug ? "border-blue-200 border-4" : "",
+	debug ? "border-blue-200 border-2" : "",
       )}
       data-dragging={isDragging}
       {...props}>
       <input {...inputProps} className="sr-only" />
+      <div
+	className={cn(
+	  "m-4",
+	  isDragging ? "border-blue-200 bg-blue-100/25 border-2 border-dashed rounded-[9px]" : "",
+	  "hover:border hover:border-dashed rounded-[9px] hover:bg-accent/50 cursor-pointer",
+	  "transition ease-in-out",
+	  "flex flex-col items-center justify-center",
+	  debug ? "border-blue-200 border-2" : "",
+	)}>
+	<div className={cn(
+	  "flex items-center justify-center size-11 border rounded-full mb-2",
+	  isDragging ? "border-2 border-blue-300 text-blue-600 bg-blue-200/40" : "",
+	  "transition ease-in-out",
+	)}>
+	  <FileUpIcon className="size-5 opacity-60" />
+	</div>
+	<p className="mb-1.5 text-sm font-medium">Upload files</p>
+	<p className="text-muted-foreground mb-2 text-xs">Drag & Drop or click to browse</p>
+      </div>
     </div>
   )
 }
