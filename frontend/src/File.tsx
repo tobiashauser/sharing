@@ -102,7 +102,7 @@ export function FileCard({ file, preview, className, debug, removeFile, id, ...p
 	    "flex min-w-0 flex-col gap-0.5",
 	    innerDebug ? "border" : "",
 	  )}>
-	    <p className="truncate whitespace-nowrap text-[13px] font-medium">{file.name}</p>
+	    <p className="truncate text-[13px] font-medium">{file.name}</p>
 	    <p className="text-muted-foreground text-xs">{formatBytes(file.size)}</p>
 	  </div>
 	</div>
