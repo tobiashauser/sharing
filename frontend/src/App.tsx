@@ -1,9 +1,17 @@
 import './App.css'
-import { DropZone, DropArea } from "./Drop.tsx"
 
 import { useFileUpload } from "./hooks/use-file-upload"
 
+import { cn } from "@/lib/utils"
+
+import { Columns } from "./Columns.tsx"
+import { DropZone, DropArea } from "./Drop.tsx"
+import { mockFile, FileCard } from "./File.tsx"
+
 export default function App() {
+  // Globally toggle debugging.
+  const debug = false
+
   // Handle all the state at the entrypoint into the website.
   const [
     {
@@ -22,28 +30,60 @@ export default function App() {
       getInputProps
     }
   ] = useFileUpload({
-    multiple: true
+    multiple: true,
   })
   
   return (
-    <>
-      <DropZone
-	className="h-dvh"
-	debug={true} 
-	onDragEnter={handleDragEnter}
-	onDragOver={handleDragOver}
-	onDragLeave={handleDragLeave}
-	onDrop={handleDrop}>
+    <DropZone
+      className="h-dvh"
+      debug={debug} 
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}>
+      <div className={cn(
+	"absolute w-full",
+	"top-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,20vh)]",
+	// "w-full flex flex-col gap-2",
+	debug ? "border-2" : "",
+      )}>
 	<div className="flex flex-col items-center">
 	  <DropArea
-	    className="h-40 w-2/3 max-w-md mt-4"
-	    debug={false}
+	    className="h-40 w-2/3 mb-6 max-w-md"
+	    debug={debug}
 	    onClick={openFileDialog}
 	    inputProps={getInputProps()}
 	    isDragging={isDragging} />
 	</div>
-      </DropZone>
-    </>
+
+	<div className="">
+	  <Columns className="">
+	    {!debug
+	      ? files.map((file) => {
+		return <FileCard
+			 id={file.id}
+			 className="w-sm"
+			 removeFile={removeFile}
+			 file={file.file}
+			 preview={file.preview}
+			 debug={debug}
+			 key={file.id} />
+	      })
+	      // This creates a whole bunch of dummy files. Some of the interaction
+	      // does not work here.
+	      : Array.from({ length: 8 }, (_, idx) => idx).map((idx) => {
+		return <FileCard
+			 removeFile={removeFile}
+			 className="w-sm"
+			 file={mockFile(idx)}
+			 debug={debug}
+			 key={idx} />
+	      })
+	    }
+	  </Columns>
+	</div>
+      </div>
+    </DropZone>
   )
 }
 

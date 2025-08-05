@@ -34,6 +34,8 @@ export function DropZone({ children, className, debug, isDragging, ...props }: D
 interface DropAreaInterface extends React.HTMLAttributes<HTMLDivElement> {
   debug?: boolean
   isDragging?: boolean
+  onClick: () => void
+  inputProps: React.InputHTMLAttributes<HTMLInputElement>
 }
 
 // A visible drop area. Make sure to hook it up to `useFileUpload'.
@@ -43,7 +45,7 @@ interface DropAreaInterface extends React.HTMLAttributes<HTMLDivElement> {
 //
 // This component should always be enclosed in a `DropZone'. Hence the
 // DropZone has the same size as the DropArea or is larger.
-export function DropArea({ className, debug, isDragging, inputProps, ...props }: DropAreaInterface) {
+export function DropArea({ className, debug, isDragging, onClick, inputProps, ...props }: DropAreaInterface) {
   return (
     <div
       className={cn(
@@ -53,6 +55,7 @@ export function DropArea({ className, debug, isDragging, inputProps, ...props }:
 	debug ? "border-blue-200 border-2" : "",
       )}
       data-dragging={isDragging}
+      onClick={onClick}
       {...props}>
       <input {...inputProps} className="sr-only" />
       <div
