@@ -10,17 +10,36 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        sbclWithPackages = pkgs.sbcl.withPackages (ps: with ps; [
-          # Add packages here:
+        inherit (nixpkgs.lib) strings map;
+        sbclPackages = with pkgs.sbclPackages; [
+          alexandria
+          com_dot_inuoe_dot_jzon
           hunchentoot
-        ]);
+        ];
+        sbclWithPackages = pkgs.sbcl.withPackages (_: sbclPackages);
+        loadPackage = package: "(asdf:load-system '${package.pname})";
+        sbclPackagesLoadFile = pkgs.writeText "packages.lisp" ''
+          (load (sb-ext:posix-getenv "ASDF"))
+          ${strings.concatStringsSep "\n" (map loadPackage sbclPackages)}
+        '';
       in
         {
-          devShell = with pkgs; mkShell {
+          devShell = with pkgs; mkShell rec {
+            buildInputs = [
+              sbclWithPackages
+              bun
+            ];
+            
             packages = [
               sbclWithPackages
               bun
             ];
+
+            LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
+
+            shellHook = ''
+              ln -sf ${sbclPackagesLoadFile} "packages.lisp"
+            '';
           };
         }
     );

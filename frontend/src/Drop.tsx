@@ -35,7 +35,7 @@ interface DropAreaInterface extends React.HTMLAttributes<HTMLDivElement> {
   debug?: boolean
   isDragging?: boolean
   onClick: () => void
-  inputProps: React.InputHTMLAttributes<HTMLInputElement>
+  inputProps: () => React.InputHTMLAttributes<HTMLInputElement>
   children?: React.ReactNode
 }
 
@@ -58,7 +58,8 @@ export function DropArea({ children, className, debug, isDragging, onClick, inpu
       data-dragging={isDragging}
       onClick={onClick}
       {...props}>
-      <input {...inputProps} className="sr-only" />
+      {/* @ts-expect-error */}
+      <input {...inputProps()} webkitdirectory className="sr-only" />
       <div
 	className={cn(
 	  "m-4",

@@ -1,33 +1,29 @@
 import './App.css'
 
+import { useState } from 'react'
 import { useFileUpload } from "./hooks/use-file-upload"
-
 import { cn } from "@/lib/utils"
+import { Send, XIcon } from "lucide-react"
 
 import { Columns } from "./Columns.tsx"
 import { DropZone, DropArea } from "./Drop.tsx"
 import { mockFile, FileCard } from "./File.tsx"
 import { Magnet } from "./Magnet.tsx"
 import { Button } from "@/components/ui/button"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
-import { Send, XIcon } from "lucide-react"
+import * as Upload from "./Upload.ts"
 
 export default function App() {
   // Globally toggle debugging.
   const debug = false
 
   // Handle all the state at the entrypoint into the website.
+  const [uploadProgress, setUploadProgress] = useState<Upload.Progress[]>([])
+
   const [
     {
       files,
       isDragging,
-      // errors
+      // errors  // TODO error handling
     },
     {
       handleDragEnter,
@@ -41,8 +37,12 @@ export default function App() {
     }
   ] = useFileUpload({
     multiple: true,
+    // TODO filter out all files that have file.type == "". They are
+    // most likely directories which are not supported.
+    // onFilesAdded: Upload.queueAndStart("/upload", setUploadProgress),
+    onFilesAdded: Upload.queue(setUploadProgress),
   })
-  
+
   return (
     <DropZone
       className="h-dvh"
@@ -60,23 +60,14 @@ export default function App() {
       )}>
 
 	<div className="flex items-center justify-center gap-8">
-	  <div className={files.length == 0 ? "invisible" : ""}>
-	    <TooltipProvider delayDuration={600}>
-	      <Tooltip>
-		<TooltipTrigger asChild>
-		  <Button
-		    onClick={clearFiles}
-		    variant="outline"
-		    size="icon"
-		    className="size-11 rounded-full text-muted-foreground/80">
-		    <XIcon className="size-5" strokeWidth={2} />
-		  </Button>
-		</TooltipTrigger>
-		<TooltipContent className="px-2 py-1 text-xs">
-		  <span>Remove all files</span>
-		</TooltipContent>
-	      </Tooltip>
-	    </TooltipProvider>
+	  <div className="invisible">
+	    <Button
+	      onClick={clearFiles}
+	      variant="outline"
+	      size="icon"
+	      className="size-11 rounded-full text-muted-foreground/80">
+	      <XIcon className="size-5" strokeWidth={2} />
+	    </Button>
 	  </div>
 
 	  <DropArea
@@ -85,7 +76,7 @@ export default function App() {
 	    )}
 	    debug={debug}
 	    onClick={openFileDialog}
-	    inputProps={getInputProps()}
+	    inputProps={getInputProps}
 	    isDragging={isDragging} />
 
 	  <div className={files.length == 0 ? "invisible" : ""}>
