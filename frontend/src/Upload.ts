@@ -4,6 +4,7 @@ import type { FileWithPreview } from "./hooks/use-file-upload"
 
 // Type for tracking upload progress.
 export type Progress = {
+  fileName: string
   fileId: string
   progress: number
   completed: boolean
@@ -84,6 +85,7 @@ export function queue(
     const newProgressItems = files.map((file) => {
       console.log(file)
       return {
+	fileName: file.file.name,
 	fileId: file.id,
 	progress: 0,
 	completed: false,
@@ -134,3 +136,45 @@ export function cancel(
   setUploadProgress(prev => prev.filter(item => item.fileId !== fileId))
 }
 
+// Remove an uploaded file from the server.
+export async function remove(
+  file: FileWithPreview,
+  setUploadProgress: React.Dispatch<React.SetStateAction<Progress[]>>,
+  adress: string,
+  sessionToken: string,
+): Promise<{ url: string }> {
+  return new Promise(async (resolve, reject) => {
+    // Send a request to the server to delete the FILE.
+    try {
+      // Create XMLHttpRequest to track progress.
+      const xhr = new XMLHttpRequest()
+      
+      // Handle completion.
+      xhr.addEventListener('load', () => {
+	if (xhr.status >= 200 && xhr.status < 300) {
+	  const response = JSON.parse(xhr.responseText)
+	  // Remove FILE from the progressQueue.
+	  cancel(file.id, setUploadProgress)
+	  resolve(response)
+	} else {
+	  reject(new Error('Deletion failed'))
+	}
+      })
+
+      // Handle error.
+      xhr.addEventListener('error', () => {
+	reject(new Error('Network error'))
+      })
+
+      // Open and send the request.
+      const url = `${adress}?name=${encodeURIComponent(file.file.name)}`
+      xhr.open('DELETE', url, true)
+      if (sessionToken) {
+	xhr.setRequestHeader('AUTHORIZATION', sessionToken)
+      }
+      xhr.send()
+    } catch (error) {
+      reject(error)
+    }
+  })
+}

@@ -1,6 +1,6 @@
 import './App.css'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useFileUpload } from "./hooks/use-file-upload"
 import { v4 as uuidv4 } from "uuid"
 import { cn } from "@/lib/utils"
@@ -15,29 +15,6 @@ import * as Upload from "./Upload.ts"
 
 // TODO filter out all files that have file.type == "". They are
 // most likely directories which are not supported.
-
-// TODO Session handling with hunchentoot.
-
-//@ts-ignore
-function useData(url: string) {
-  const [data, setData] = useState(null);
-  useEffect(() => {
-    if (url) {
-      let ignore = false;
-      fetch(url)
-        .then(response => response.json())
-        .then(json => {
-          if (!ignore) {
-            setData(json);
-          }
-        });
-      return () => {
-        ignore = true;
-      };
-    }
-  }, [url]);
-  return data;
-}
 
 export default function App() {
   // Globally toggle debugging.
@@ -134,7 +111,13 @@ export default function App() {
 	    return <FileCard
 		     id={file.id}
 		     className="w-sm"
-		     removeFile={removeFile}
+		     removeFile={(id) => {
+		       removeFile(id)
+		       const file = files.find(file => file.id === id)
+		       if (file) {
+			 Upload.remove(file, setUploadProgress, "/delete", sessionToken)
+		       }
+		     }}
 		     file={file.file}
 		     preview={file.preview}
 		     debug={debug}

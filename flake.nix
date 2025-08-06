@@ -24,6 +24,7 @@
         '';
       in
         {
+          # A development shell automatically entered with direnv.
           devShell = with pkgs; mkShell rec {
             buildInputs = [
               sbclWithPackages
