@@ -37,6 +37,7 @@ interface DropAreaInterface extends React.HTMLAttributes<HTMLDivElement> {
   onClick: () => void
   inputProps: () => React.InputHTMLAttributes<HTMLInputElement>
   children?: React.ReactNode
+  allowSend?: boolean
 }
 
 // A visible drop area. Make sure to hook it up to `useFileUpload'.
@@ -46,7 +47,7 @@ interface DropAreaInterface extends React.HTMLAttributes<HTMLDivElement> {
 //
 // This component should always be enclosed in a `DropZone'. Hence the
 // DropZone has the same size as the DropArea or is larger.
-export function DropArea({ children, className, debug, isDragging, onClick, inputProps, ...props }: DropAreaInterface) {
+export function DropArea({ allowSend, children, className, debug, isDragging, onClick, inputProps, ...props }: DropAreaInterface) {
   return (
     <div
       className={cn(
@@ -59,6 +60,8 @@ export function DropArea({ children, className, debug, isDragging, onClick, inpu
       onClick={onClick}
       {...props}>
       <input {...inputProps()} className="sr-only" />
+
+      {/* Show information about the drop area */}
       <div
 	className={cn(
 	  "m-4",
@@ -68,6 +71,8 @@ export function DropArea({ children, className, debug, isDragging, onClick, inpu
 	  "flex flex-col items-center justify-center",
 	  debug ? "border-blue-200 border-2" : "",
 	)}>
+
+	{/* An icon */}
 	<div className={cn(
 	  "flex items-center justify-center size-11 border rounded-full mb-2",
 	  isDragging ? "border-2 border-blue-300 text-blue-600 bg-blue-200/40" : "",
@@ -75,8 +80,11 @@ export function DropArea({ children, className, debug, isDragging, onClick, inpu
 	)}>
 	  <FileUpIcon className="size-5 opacity-60" />
 	</div>
+
+	{/* And some informational text */}
 	<p className="mb-1.5 text-sm font-medium">Upload files</p>
 	<p className="text-muted-foreground mb-2 text-xs">Drag & Drop or click to browse</p>
+
       </div>
       {children}
     </div>
