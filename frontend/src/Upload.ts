@@ -15,6 +15,7 @@ async function upload(
   file: File,
   adress: string,
   setUploadProgress: React.Dispatch<React.SetStateAction<Progress[]>>,
+  sessionToken?: string,
 ): Promise<{ url: string }> {
   return new Promise(async (resolve, reject) => {
     try {
@@ -24,7 +25,7 @@ async function upload(
 
       // Create XMLHttpRequest to track progress.
       const xhr = new XMLHttpRequest()
-
+      
       // Track upload progress.
       xhr.upload.addEventListener('progress', (event) => {
 	if (event.lengthComputable) {
@@ -64,6 +65,9 @@ async function upload(
 
       // Open and send the request.
       xhr.open('POST', adress, true)
+      if (sessionToken) {
+	xhr.setRequestHeader('AUTHORIZATION', sessionToken)
+      }
       xhr.send(formData)
     } catch (error) {
       reject(error)
@@ -95,10 +99,11 @@ export function start(
   files: FileWithPreview[],
   adress: string,
   setUploadProgress: React.Dispatch<React.SetStateAction<Progress[]>>,
+  sessionToken?: string,
 ) {
   files.forEach(file => {
     if (file.file instanceof File) {
-      upload(file.file, adress, setUploadProgress)
+      upload(file.file, adress, setUploadProgress, sessionToken)
 	.then(response => {
 	  console.log('Upload successful:', response.url)
 	})
@@ -113,10 +118,11 @@ export function start(
 export function queueAndStart(
   adress: string,
   setUploadProgress: React.Dispatch<React.SetStateAction<Progress[]>>,
+  sessionToken?: string,
 ): (files: FileWithPreview[]) => void {
   return (files: FileWithPreview[]) => {
     queue(setUploadProgress)(files)
-    start(files, adress, setUploadProgress)
+    start(files, adress, setUploadProgress, sessionToken)
   }
 }
 

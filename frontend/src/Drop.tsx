@@ -58,8 +58,7 @@ export function DropArea({ children, className, debug, isDragging, onClick, inpu
       data-dragging={isDragging}
       onClick={onClick}
       {...props}>
-      {/* @ts-expect-error */}
-      <input {...inputProps()} webkitdirectory className="sr-only" />
+      <input {...inputProps()} className="sr-only" />
       <div
 	className={cn(
 	  "m-4",

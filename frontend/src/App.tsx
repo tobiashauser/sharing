@@ -1,24 +1,60 @@
 import './App.css'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFileUpload } from "./hooks/use-file-upload"
+import { v4 as uuidv4 } from "uuid"
 import { cn } from "@/lib/utils"
 import { Send, XIcon } from "lucide-react"
 
 import { Columns } from "./Columns.tsx"
 import { DropZone, DropArea } from "./Drop.tsx"
-import { mockFile, FileCard } from "./File.tsx"
+import { FileCard } from "./File.tsx"
 import { Magnet } from "./Magnet.tsx"
 import { Button } from "@/components/ui/button"
 import * as Upload from "./Upload.ts"
+
+// TODO filter out all files that have file.type == "". They are
+// most likely directories which are not supported.
+
+// TODO Session handling with hunchentoot.
+
+//@ts-ignore
+function useData(url: string) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (url) {
+      let ignore = false;
+      fetch(url)
+        .then(response => response.json())
+        .then(json => {
+          if (!ignore) {
+            setData(json);
+          }
+        });
+      return () => {
+        ignore = true;
+      };
+    }
+  }, [url]);
+  return data;
+}
 
 export default function App() {
   // Globally toggle debugging.
   const debug = false
 
   // Handle all the state at the entrypoint into the website.
+  // `uploadProgress' can include files that have since been removed.
+  // Treat it as a dictionary to look up the progress for a file in
+  // FILES.
+
+  //@ts-ignore
   const [uploadProgress, setUploadProgress] = useState<Upload.Progress[]>([])
 
+  // Manage the session token. Remember to invalidate the session token.
+  //@ts-ignore
+  const [sessionToken, setSessionToken] = useState(uuidv4())
+  
   const [
     {
       files,
@@ -37,10 +73,7 @@ export default function App() {
     }
   ] = useFileUpload({
     multiple: true,
-    // TODO filter out all files that have file.type == "". They are
-    // most likely directories which are not supported.
-    // onFilesAdded: Upload.queueAndStart("/upload", setUploadProgress),
-    onFilesAdded: Upload.queue(setUploadProgress),
+    onFilesAdded: Upload.queueAndStart("/upload", setUploadProgress, sessionToken),
   })
 
   return (
@@ -97,28 +130,16 @@ export default function App() {
 
 
 	<Columns className="">
-	  {!debug
-	    ? files.map((file) => {
-	      return <FileCard
-		       id={file.id}
-		       className="w-sm"
-		       removeFile={removeFile}
-		       file={file.file}
-		       preview={file.preview}
-		       debug={debug}
-		       key={file.id} />
-	    })
-	    // This creates a whole bunch of dummy files. Some of the interaction
-	    // does not work here.
-	    : Array.from({ length: 8 }, (_, idx) => idx).map((idx) => {
-	      return <FileCard
-		       removeFile={removeFile}
-		       className="w-sm"
-		       file={mockFile(idx)}
-		       debug={debug}
-		       key={idx} />
-	    })
-	  }
+	  {files.map((file) => {
+	    return <FileCard
+		     id={file.id}
+		     className="w-sm"
+		     removeFile={removeFile}
+		     file={file.file}
+		     preview={file.preview}
+		     debug={debug}
+		     key={file.id} />
+	  })}
 	</Columns>
       </div>
     </DropZone>
