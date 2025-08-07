@@ -34,6 +34,7 @@
             packages = [
               sbclWithPackages
               bun
+              prettierd
             ];
 
             LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
