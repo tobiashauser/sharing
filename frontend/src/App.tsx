@@ -5,7 +5,7 @@ import logo from "./logo.svg";
 
 const App: Component = () => {
   return (
-    <div class="bg-red-200">
+    <div>
       <header>
         <img src={logo} alt="logo" />
         <p>
