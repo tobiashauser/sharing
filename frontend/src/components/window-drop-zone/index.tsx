@@ -1,0 +1,1 @@
+export { createWindowDropzone } from "./createWindowDropzone";
