@@ -2,6 +2,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// The pseudo-selector shorthands don't work reliably...
+
 // Applies SELECTOR to the list of CLASSES.
 export function pseudo(selector: string, classes: string): string {
   return (

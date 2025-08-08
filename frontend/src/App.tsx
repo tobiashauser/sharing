@@ -10,7 +10,7 @@ import { FiUpload } from "solid-icons/fi";
 
 import "./App.css";
 import { createWindowDropzone } from "./components/window-drop-zone";
-import { cn, dragging, hover } from "./prelude";
+import { cn } from "./prelude";
 
 const WithBorder: ParentComponent = (props) => {
   return <div class="flex">{props.children}</div>;
@@ -48,14 +48,20 @@ const DropArea: Component<
       <Centered
         class={cn(
           "cursor-pointer rounded-[9px] border-dashed",
-          hover("bg-accent/50 border-blue-200 border"),
-          dragging("border-blue-200 bg-blue-100/25 border-2"),
+          "hover:bg-accent/50 hover:border",
+          "data-[dragging=true]:border-blue-200 data-[dragging=true]:bg-blue-100/25 data-[dragging=true]:border-2",
           "ease-in-out transition",
         )}
         data-dragging={props.isDragging}
         fill={true}
       >
-        <Centered class="mb-2 p-3 rounded-full border">
+        <Centered
+          class={cn(
+            "mb-3 size-11 ease-in-out text-muted-foreground rounded-full border transition",
+            "data-[dragging=true]:border-blue-300 data-[dragging=true]:bg-blue-200/40 data-[dragging=true]:text-blue-600 data-[dragging=true]:border-2",
+          )}
+          data-dragging={props.isDragging}
+        >
           <FiUpload class="size-5 opacity-60" />
         </Centered>
         <p class="text-sm mb-1.5 font-medium">Upload files</p>
