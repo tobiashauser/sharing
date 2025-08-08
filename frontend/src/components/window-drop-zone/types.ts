@@ -60,5 +60,6 @@ export type WindowDropzone = {
     options?: GetInputPropsOptions,
   ) => JSX.HTMLAttributes<HTMLInputElement>;
   isDragging: Accessor<boolean>;
+  openFileDialog: () => void;
   setRefs: (input: HTMLInputElement) => void;
 };

@@ -28,29 +28,16 @@ export const createWindowDropzone = (
   const [_enteredTime, _setEnteredTime] = createSignal(Date.now());
   const [errors, setErrors] = createSignal<FileErrors>({});
 
-  // Setup.
-  const getInputProps = ({
-    refKey = "ref",
-    ...rest
-  }: GetInputPropsOptions = {}): JSX.InputHTMLAttributes<HTMLInputElement> => {
-    return {
-      [refKey]: inputRef,
-      tabIndex: -1,
-      type: "file",
-      ...rest,
-    };
-  };
-
-  const setRefs = (inputElement: HTMLInputElement) => {
-    inputRef = inputElement;
-  };
-
   // Internal.
   const _parcedAccept = parseAccept(accept);
-  const _handleFiles = (files: FileList) => {
+  const _handleFiles = (newFiles: FileList) => {
     if (disabled) return;
 
-    const transformedFiles = transformFiles(files);
+    const transformedFiles = transformFiles(newFiles).filter((file) => {
+      return !files().some((cur) => {
+        return cur.name === file.name && cur.size === file.size;
+      });
+    });
 
     const newErrors: FileErrors = validateFiles(
       transformedFiles,
@@ -83,6 +70,8 @@ export const createWindowDropzone = (
     e.stopPropagation();
 
     if (disabled) return;
+
+    setIsDragging(false);
 
     const droppedFiles = e.dataTransfer?.files;
 
@@ -131,12 +120,49 @@ export const createWindowDropzone = (
 
   window.addEventListener("dragleave", handleDragLeave);
 
+  const handleChange = (e: Event) => {
+    if (disabled) return;
+    const files = (e.currentTarget as HTMLInputElement).files;
+    if (!files) return;
+
+    _handleFiles(files);
+  };
+
+  const openFileDialog = () => {
+    if (disabled) return;
+
+    if (inputRef) {
+      inputRef.click();
+    }
+  };
+
+  // Setup.
+  const getInputProps = ({
+    refKey = "ref",
+    ...rest
+  }: GetInputPropsOptions = {}): JSX.InputHTMLAttributes<HTMLInputElement> => {
+    return {
+      [refKey]: inputRef,
+      tabIndex: -1,
+      type: "file",
+      disabled,
+      accept: _parcedAccept,
+      onChange: handleChange,
+      ...rest,
+    };
+  };
+
+  const setRefs = (inputElement: HTMLInputElement) => {
+    inputRef = inputElement;
+  };
+
   // Return.
   return {
     errors,
     files,
     getInputProps,
     isDragging,
+    openFileDialog,
     setRefs,
   };
 };

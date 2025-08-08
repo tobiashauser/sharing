@@ -1,4 +1,10 @@
-import { JSX, ParentComponent, ParentProps, type Component } from "solid-js";
+import {
+  createEffect,
+  JSX,
+  ParentComponent,
+  ParentProps,
+  type Component,
+} from "solid-js";
 
 import { FiUpload } from "solid-icons/fi";
 
@@ -32,6 +38,7 @@ const DropArea: Component<
 > = (props) => {
   return (
     <Centered
+      {...props}
       class={cn(
         "p-4 rounded-xl border shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]",
         props.class,
@@ -64,13 +71,17 @@ const DropArea: Component<
 // manage state and build the layout of the components. Don't push any
 // top-level layout logic into other components.
 const App: Component = () => {
-  const { errors, files, getInputProps, isDragging, setRefs } =
+  const { errors, files, getInputProps, isDragging, setRefs, openFileDialog } =
     createWindowDropzone();
 
   // Finish the setup for the window drop zone.
   let inputRef!: HTMLInputElement;
   setTimeout(() => {
     setRefs(inputRef);
+  });
+
+  createEffect(() => {
+    console.log("files", files());
   });
 
   return (
@@ -88,7 +99,11 @@ const App: Component = () => {
           {/* Add enough margin for the shadow and explicitely set the
           height and width, otherwise the blue border with an
           increased width will grow the entire element.  */}
-          <DropArea class="m-6 h-40 max-w-md w-2/3" isDragging={isDragging()} />
+          <DropArea
+            class="m-6 h-40 max-w-md w-2/3"
+            isDragging={isDragging()}
+            onclick={openFileDialog}
+          />
         </div>
         {/* Set the width of each cell with `auto-cols'. */}
         <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
