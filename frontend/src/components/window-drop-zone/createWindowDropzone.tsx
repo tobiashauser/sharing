@@ -125,7 +125,8 @@ export const createWindowDropzone = (
       if (now > _enteredTime()) {
         setIsDragging(false);
       }
-    }, 100);
+      // This sets the delay, it must be set to an appropriate number.
+    }, 200);
   };
 
   window.addEventListener("dragleave", handleDragLeave);
