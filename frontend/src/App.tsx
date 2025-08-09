@@ -9,7 +9,8 @@ import {
 import { FiUpload } from "solid-icons/fi";
 
 import "./App.css";
-import { createWindowDropzone } from "./components/window-drop-zone";
+import { dropzone } from "./components/drop-zone/dropzone";
+
 import { cn } from "./prelude";
 
 const WithBorder: ParentComponent = (props) => {
@@ -77,23 +78,33 @@ const DropArea: Component<
 // manage state and build the layout of the components. Don't push any
 // top-level layout logic into other components.
 const App: Component = () => {
-  const { errors, files, getInputProps, isDragging, setRefs, openFileDialog } =
-    createWindowDropzone();
+  // const { errors, files, getInputProps, isDragging, setRefs, openFileDialog } =
+  //   createWindowDropzone();
+  const { bindInputElement, configureInputElement, isDragging } =
+    dropzone(window);
 
   // Finish the setup for the window drop zone.
   let inputRef!: HTMLInputElement;
+  // setTimeout(() => {
+  //   setRefs(inputRef);
+  // });
   setTimeout(() => {
-    setRefs(inputRef);
+    bindInputElement(inputRef);
   });
 
   createEffect(() => {
-    console.log("files", files());
+    console.log("isDragging", isDragging());
   });
 
   return (
     <>
       {/* This is needed as a target for the drop zone. */}
-      <input {...getInputProps()} class="sr-only" ref={inputRef} />
+      {/* <input {...getInputProps()} class="sr-only" ref={inputRef} /> */}
+      <input
+        {...configureInputElement({ refKey: "ref" })}
+        class="sr-only"
+        ref={inputRef}
+      />
       {/* This div covers the entire viewport. It has the standard padding-2 on all sides. */}
       <div class="flex justify-between">
         <span class="bg-red-200">ENTER CODE</span>
@@ -108,7 +119,7 @@ const App: Component = () => {
           <DropArea
             class="m-6 h-40 max-w-md w-2/3"
             isDragging={isDragging()}
-            onclick={openFileDialog}
+            // onclick={openFileDialog}
           />
         </div>
         {/* Set the width of each cell with `auto-cols'. */}
