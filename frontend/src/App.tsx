@@ -78,28 +78,28 @@ const DropArea: Component<
 // manage state and build the layout of the components. Don't push any
 // top-level layout logic into other components.
 const App: Component = () => {
-  // const { errors, files, getInputProps, isDragging, setRefs, openFileDialog } =
-  //   createWindowDropzone();
-  const { bindInputElement, configureInputElement, getDragging } =
-    dropzone(window);
+  const {
+    bindInputElement,
+    configureInputElement,
+    getDragging,
+    getItems,
+    openFileDialog,
+  } = dropzone(window, true);
 
   // Finish the setup for the window drop zone.
   let inputRef!: HTMLInputElement;
-  // setTimeout(() => {
-  //   setRefs(inputRef);
-  // });
   setTimeout(() => {
     bindInputElement(inputRef);
   });
 
   createEffect(() => {
-    console.log("isDragging", getDragging());
+    // console.log("isDragging", getDragging());
+    console.log("items", getItems());
   });
 
   return (
     <>
       {/* This is needed as a target for the drop zone. */}
-      {/* <input {...getInputProps()} class="sr-only" ref={inputRef} /> */}
       <input
         {...configureInputElement({ refKey: "ref" })}
         class="sr-only"
@@ -119,7 +119,7 @@ const App: Component = () => {
           <DropArea
             class="m-6 h-40 max-w-md w-2/3"
             isDragging={getDragging()}
-            // onclick={openFileDialog}
+            onclick={openFileDialog}
           />
         </div>
         {/* Set the width of each cell with `auto-cols'. */}

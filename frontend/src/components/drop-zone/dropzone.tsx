@@ -3,19 +3,46 @@
 
 import { Accessor, createSignal, JSX, Setter } from "solid-js";
 
-/// Actions
-//
-//  Various functions that manage state.
+// Unfortunately, I need to consolidate items that can either be a
+// `FileSystemEntry' when dragged or a File when selected. Eventually
+// everything needs to be a file so that I can send it to the backend.
+// However, that means I have to manually keep track of (recursive)
+// directories.
 
-function handleDroppedItem(item: FileSystemEntry) {
-  if (item instanceof FileSystemFileEntry) {
-    console.log("file", item);
-  } else if (item instanceof FileSystemDirectoryEntry) {
-    console.log("dir", item);
-  } else {
-    // [todo] error handling
-    console.log("unrecognized", item);
-  }
+type Item = FileSystemEntry | File;
+type Items = Item[];
+
+/// Handlers
+//
+//  They can be thought as user actions such as dropping a folder or
+//  selecting a file in the file picker.
+
+function handleDroppedItem(setItems: Setter<Items>) {
+  return (item: FileSystemEntry) => {
+    if (item instanceof FileSystemFileEntry) {
+      item.file((file) => console.log("-->", file));
+    }
+
+    setItems((prev) => {
+      if (prev.some((prevItem) => prevItem.fullPath === item.fullPath)) {
+        return prev;
+      } else {
+        return [...prev, item];
+      }
+    });
+  };
+}
+
+// Handle file(s) selected in the file picker. Directories are not
+// possible. This function must be added to the InputElement's
+// `onchange' attribute.
+function handleSelectedItems(): EventListener {
+  return (e) => {
+    const files = (e.currentTarget as HTMLInputElement).files;
+    if (files) {
+      console.log("==>", files);
+    }
+  };
 }
 
 /// Events
@@ -26,7 +53,7 @@ function handleDroppedItem(item: FileSystemEntry) {
 function onDragEnter(
   setDragging: Setter<boolean>,
   setLastDrag: Setter<number>,
-): EventListenerOrEventListenerObject {
+): EventListener {
   return (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -41,7 +68,7 @@ function onDragLeave(
   getLastDrag: Accessor<number>,
   delay: number,
   windowDropZone: boolean,
-): EventListenerOrEventListenerObject {
+): EventListener {
   return (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -63,7 +90,8 @@ function onDragLeave(
 
 function onDrop(
   setDragging: Setter<boolean>,
-): EventListenerOrEventListenerObject {
+  handleDroppedItem: (item: FileSystemEntry) => void,
+): EventListener {
   return (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -98,7 +126,7 @@ function onDragOver(): EventListener {
 /// dropzone
 //
 //  This is the main function that kickstart the creation of a dropzone.
-export function dropzone(element: Window | HTMLElement) {
+export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
   // The dropzone must be connected to a <input> element. This
   // requires a bit of a convoluated setup in which we return a setter
   // that must be called inside `setTimout'.
@@ -117,15 +145,23 @@ export function dropzone(element: Window | HTMLElement) {
     return {
       [refKey]: inputElement,
       type: "file",
+      multiple: multiple,
+      onchange: handleSelectedItems(),
       ...rest,
     };
+  };
+
+  const openFileDialog = () => {
+    if (inputElement) {
+      inputElement.click();
+    }
   };
 
   // Alright, now that the setup is finally done, we can declare the
   // state we want to manage.
   const [getDragging, setDragging] = createSignal(false);
   const [getLastDrag, setLastDrag] = createSignal(Date.now());
-  const [getItems, setItems] = createSignal<FileSystemFileEntry[]>([]);
+  const [getItems, setItems] = createSignal<(FileSystemEntry | File)[]>([]);
 
   // Finally, we need to attach all kinds of event handlers.
   element.addEventListener("dragenter", onDragEnter(setDragging, setLastDrag));
@@ -134,11 +170,16 @@ export function dropzone(element: Window | HTMLElement) {
     onDragLeave(setDragging, getLastDrag, 200, element instanceof Window),
   );
   element.addEventListener("dragover", onDragOver());
-  element.addEventListener("drop", onDrop(setDragging));
+  element.addEventListener(
+    "drop",
+    onDrop(setDragging, handleDroppedItem(setItems)),
+  );
 
   return {
     bindInputElement,
     configureInputElement,
     getDragging,
+    getItems,
+    openFileDialog,
   };
 }
