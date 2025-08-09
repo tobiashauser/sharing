@@ -5,25 +5,40 @@ import { Accessor, createSignal, JSX, Setter } from "solid-js";
 
 /// Actions
 //
+//  Various functions that manage state.
+
+function handleDroppedItem(item: FileSystemEntry) {
+  if (item instanceof FileSystemFileEntry) {
+    console.log("file", item);
+  } else if (item instanceof FileSystemDirectoryEntry) {
+    console.log("dir", item);
+  } else {
+    // [todo] error handling
+    console.log("unrecognized", item);
+  }
+}
+
+/// Events
+//
 //  The dropzone needs to configure various event handlers that handle
 //  dragging and clicking.
 
-function dragenter(
-  setIsDragging: Setter<boolean>,
+function onDragEnter(
+  setDragging: Setter<boolean>,
   setLastDrag: Setter<number>,
 ): EventListenerOrEventListenerObject {
   return (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setIsDragging(true);
+    setDragging(true);
     setLastDrag(Date.now());
   };
 }
 
-function dragleave(
-  setIsDragging: Setter<boolean>,
-  lastDrag: Accessor<number>,
+function onDragLeave(
+  setDragging: Setter<boolean>,
+  getLastDrag: Accessor<number>,
   delay: number,
   windowDropZone: boolean,
 ): EventListenerOrEventListenerObject {
@@ -36,30 +51,42 @@ function dragleave(
     if (windowDropZone) {
       const now = Date.now();
       setTimeout(() => {
-        if (now > lastDrag()) {
-          setIsDragging(false);
+        if (now > getLastDrag()) {
+          setDragging(false);
         }
       }, delay);
     } else {
-      setIsDragging(false);
+      setDragging(false);
     }
   };
 }
 
-function drop(
-  setIsDragging: Setter<boolean>,
+function onDrop(
+  setDragging: Setter<boolean>,
 ): EventListenerOrEventListenerObject {
   return (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    setIsDragging(false);
+    setDragging(false);
 
-    console.log(new DataTransferItem().webkitGetAsEntry());
+    // "Type"script...
+    if (e instanceof DragEvent) {
+      if (e.dataTransfer) {
+        const items = e.dataTransfer.items;
+        // Since objects aren't really objects, we have to manually iterate.
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i].webkitGetAsEntry();
+          if (item) {
+            handleDroppedItem(item);
+          }
+        }
+      }
+    }
   };
 }
 
-function dragover(): EventListener {
+function onDragOver(): EventListener {
   return (e) => {
     // This necessary to keep the browser from taking over the file(s).
     // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
@@ -96,21 +123,22 @@ export function dropzone(element: Window | HTMLElement) {
 
   // Alright, now that the setup is finally done, we can declare the
   // state we want to manage.
-  const [isDragging, setIsDragging] = createSignal(false);
-  const [lastDrag, setLastDrag] = createSignal(Date.now());
+  const [getDragging, setDragging] = createSignal(false);
+  const [getLastDrag, setLastDrag] = createSignal(Date.now());
+  const [getItems, setItems] = createSignal<FileSystemFileEntry[]>([]);
 
   // Finally, we need to attach all kinds of event handlers.
-  element.addEventListener("dragenter", dragenter(setIsDragging, setLastDrag));
+  element.addEventListener("dragenter", onDragEnter(setDragging, setLastDrag));
   element.addEventListener(
     "dragleave",
-    dragleave(setIsDragging, lastDrag, 200, element instanceof Window),
+    onDragLeave(setDragging, getLastDrag, 200, element instanceof Window),
   );
-  element.addEventListener("dragover", dragover());
-  element.addEventListener("drop", drop(setIsDragging));
+  element.addEventListener("dragover", onDragOver());
+  element.addEventListener("drop", onDrop(setDragging));
 
   return {
     bindInputElement,
     configureInputElement,
-    isDragging,
+    getDragging,
   };
 }

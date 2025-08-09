@@ -80,7 +80,7 @@ const DropArea: Component<
 const App: Component = () => {
   // const { errors, files, getInputProps, isDragging, setRefs, openFileDialog } =
   //   createWindowDropzone();
-  const { bindInputElement, configureInputElement, isDragging } =
+  const { bindInputElement, configureInputElement, getDragging } =
     dropzone(window);
 
   // Finish the setup for the window drop zone.
@@ -93,7 +93,7 @@ const App: Component = () => {
   });
 
   createEffect(() => {
-    console.log("isDragging", isDragging());
+    console.log("isDragging", getDragging());
   });
 
   return (
@@ -118,7 +118,7 @@ const App: Component = () => {
           increased width will grow the entire element.  */}
           <DropArea
             class="m-6 h-40 max-w-md w-2/3"
-            isDragging={isDragging()}
+            isDragging={getDragging()}
             // onclick={openFileDialog}
           />
         </div>
