@@ -10,8 +10,8 @@ import { Accessor, createSignal, JSX, Setter } from "solid-js";
 // directories.
 
 // I need to attach some more state to a file object.
-type Folder = { name: string; contents: Item[] };
-type Item = File | Folder;
+export type Folder = { name: string; contents: Item[] };
+export type Item = File | Folder;
 
 // Maybe I want to change this type at some point.
 type ItemId = string;
