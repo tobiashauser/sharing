@@ -1,76 +1,68 @@
-import { FiUpload } from "solid-icons/fi";
-import {
-  createEffect,
-  JSX,
-  ParentComponent,
-  ParentProps,
-  type Component,
-} from "solid-js";
+import { createEffect, type Component } from "solid-js";
 import "./App.css";
-import { dropzone } from "./components/drop-zone/dropzone";
+import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
-import { cn } from "./prelude";
 
-const WithBorder: ParentComponent = (props) => {
-  return <div class="flex">{props.children}</div>;
-};
+// const WithBorder: ParentComponent = (props) => {
+//   return <div class="flex">{props.children}</div>;
+// };
 
-const Centered: Component<
-  { fill?: boolean } & ParentProps & JSX.HTMLAttributes<HTMLDivElement>
-> = (props) => {
-  return (
-    <div
-      {...props}
-      class={cn(
-        "flex flex-col items-center justify-center",
-        props.class,
-        props.fill ? "h-1/1 w-1/1" : "",
-      )}
-    >
-      {props.children}
-    </div>
-  );
-};
+// const Centered: Component<
+//   { fill?: boolean } & ParentProps & JSX.HTMLAttributes<HTMLDivElement>
+// > = (props) => {
+//   return (
+//     <div
+//       {...props}
+//       class={cn(
+//         "flex flex-col items-center justify-center",
+//         props.class,
+//         props.fill ? "h-1/1 w-1/1" : "",
+//       )}
+//     >
+//       {props.children}
+//     </div>
+//   );
+// };
 
-const DropArea: Component<
-  { isDragging: boolean } & JSX.HTMLAttributes<HTMLDivElement>
-> = (props) => {
-  return (
-    <Centered
-      {...props}
-      class={cn(
-        "p-4 rounded-xl border shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]",
-        props.class,
-      )}
-      data-dragging={props.isDragging}
-    >
-      <Centered
-        class={cn(
-          "cursor-pointer rounded-[9px] border-dashed",
-          "hover:bg-accent/50 hover:border",
-          "data-[dragging=true]:border-blue-200 data-[dragging=true]:bg-blue-100/25 data-[dragging=true]:border-2",
-          "ease-in-out transition",
-        )}
-        data-dragging={props.isDragging}
-        fill={true}
-      >
-        <Centered
-          class={cn(
-            "mb-3 size-11 ease-in-out text-muted-foreground rounded-full border transition",
-            "data-[dragging=true]:border-blue-300 data-[dragging=true]:bg-blue-200/40 data-[dragging=true]:text-blue-600 data-[dragging=true]:border-2",
-          )}
-          data-dragging={props.isDragging}
-        >
-          <FiUpload class="size-5 opacity-60" />
-        </Centered>
-        <p class="text-sm mb-1.5 font-medium">Upload files</p>
-        <p class="text-muted-foreground text-xs">
-          Drag & Drop or click to browse
-        </p>
-      </Centered>
-    </Centered>
-  );
-};
+// const DropArea: Component<
+//   { isDragging: boolean } & JSX.HTMLAttributes<HTMLDivElement>
+// > = (props) => {
+//   return (
+//     <Centered
+//       {...props}
+//       class={cn(
+//         "p-4 rounded-xl border shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]",
+//         props.class,
+//       )}
+//       data-dragging={props.isDragging}
+//     >
+//       <Centered
+//         class={cn(
+//           "cursor-pointer rounded-[9px] border-dashed",
+//           "hover:bg-accent/50 hover:border",
+//           "data-[dragging=true]:border-blue-200 data-[dragging=true]:bg-blue-100/25 data-[dragging=true]:border-2",
+//           "ease-in-out transition",
+//         )}
+//         data-dragging={props.isDragging}
+//         fill={true}
+//       >
+//         <Centered
+//           class={cn(
+//             "mb-3 size-11 ease-in-out text-muted-foreground rounded-full border transition",
+//             "data-[dragging=true]:border-blue-300 data-[dragging=true]:bg-blue-200/40 data-[dragging=true]:text-blue-600 data-[dragging=true]:border-2",
+//           )}
+//           data-dragging={props.isDragging}
+//         >
+//           <FiUpload class="size-5 opacity-60" />
+//         </Centered>
+//         <p class="text-sm mb-1.5 font-medium">Upload files</p>
+//         <p class="text-muted-foreground text-xs">
+//           Drag & Drop or click to browse
+//         </p>
+//       </Centered>
+//     </Centered>
+//   );
+// };
 
 // The main entrypoint into the app. This component is reponsible to
 // manage state and build the layout of the components. Don't push any
