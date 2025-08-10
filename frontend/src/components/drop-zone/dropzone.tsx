@@ -9,38 +9,128 @@ import { Accessor, createSignal, JSX, Setter } from "solid-js";
 // However, that means I have to manually keep track of (recursive)
 // directories.
 
-type Item = FileSystemEntry | File;
-type Items = Item[];
+// I need to attach some more state to a file object.
+type Folder = { name: string; contents: Item[] };
+type Item = File | Folder;
+
+// Maybe I want to change this type at some point.
+type ItemId = string;
+type ItemIds = Set<ItemId>;
+
+// This must ensure that the same ID is created regardless of input type.
+function createId(item: Item): ItemId {
+  if (item instanceof File) {
+    return (
+      "file" +
+      (item.webkitRelativePath ? item.webkitRelativePath : item.name) +
+      item.size
+    );
+  } else {
+    return "folder" + item.name;
+  }
+}
+
+/// Internal API
+
+function readFileEntry(entry: FileSystemFileEntry): Promise<File> {
+  return new Promise((resolve, reject) => {
+    entry.file(
+      (file) => {
+        resolve(file);
+      },
+      (error) => {
+        reject(error);
+      },
+    );
+  });
+}
+
+function readDirectoryEntries(
+  reader: FileSystemDirectoryReader,
+): Promise<FileSystemEntry[]> {
+  return new Promise((resolve, reject) => {
+    reader.readEntries(
+      (entries) => {
+        resolve(entries);
+      },
+      (error) => {
+        reject(error);
+      },
+    );
+  });
+}
+
+async function processDirectory(directory: FileSystemDirectoryEntry) {
+  const reader = directory.createReader();
+  let contents: Item[] = await processDirectoryEntries(
+    await readDirectoryEntries(reader),
+  );
+
+  return {
+    name: directory.name,
+    contents: contents,
+  } satisfies Folder;
+}
+
+async function processDirectoryEntries(entries: FileSystemEntry[]) {
+  let contents: Item[] = [];
+
+  for (const entry of entries) {
+    if (entry instanceof FileSystemFileEntry) {
+      const file = await readFileEntry(entry);
+      contents.push(file);
+    } else if (entry instanceof FileSystemDirectoryEntry) {
+      const subfolderContents = await processDirectory(entry);
+      contents.push(subfolderContents);
+    }
+  }
+
+  return contents;
+}
+
+function addItem(
+  setItems: Setter<Item[]>,
+  getItemIds: Accessor<ItemIds>,
+  setItemIds: Setter<ItemIds>,
+) {
+  return (item: Item) => {
+    const id = createId(item);
+    if (!getItemIds().has(id)) {
+      setItemIds((prev) => prev.add(id));
+      setItems((prev) => [...prev, item]);
+    }
+  };
+}
 
 /// Handlers
 //
 //  They can be thought as user actions such as dropping a folder or
 //  selecting a file in the file picker.
 
-function handleDroppedItem(setItems: Setter<Items>) {
-  return (item: FileSystemEntry) => {
+function handleDroppedItem(addItem: (item: Item) => void) {
+  return async (item: FileSystemEntry) => {
     if (item instanceof FileSystemFileEntry) {
-      item.file((file) => console.log("-->", file));
+      // Item dropped is a file.
+      const file = await readFileEntry(item);
+      addItem(file);
+    } else if (item instanceof FileSystemDirectoryEntry) {
+      // Item dropped is a directory, which must be processed recursively.
+      const folder = await processDirectory(item);
+      addItem(folder);
     }
-
-    setItems((prev) => {
-      if (prev.some((prevItem) => prevItem.fullPath === item.fullPath)) {
-        return prev;
-      } else {
-        return [...prev, item];
-      }
-    });
   };
 }
 
 // Handle file(s) selected in the file picker. Directories are not
 // possible. This function must be added to the InputElement's
-// `onchange' attribute.
-function handleSelectedItems(): EventListener {
+// `onchange' attribute. A selection is always added at the top level.
+function handleSelectedItems(addFile: (file: File) => void): EventListener {
   return (e) => {
     const files = (e.currentTarget as HTMLInputElement).files;
     if (files) {
-      console.log("==>", files);
+      for (let i = 0; i < files.length; i++) {
+        addFile(files[i]);
+      }
     }
   };
 }
@@ -104,7 +194,12 @@ function onDrop(
         const items = e.dataTransfer.items;
         // Since objects aren't really objects, we have to manually iterate.
         for (let i = 0; i < items.length; i++) {
-          const item = items[i].webkitGetAsEntry();
+          // @ts-ignore - getAsEntry is not available yet, webkitGetAsEntry may get renamed to getAsEntry.
+          // So we are coding defensively here for that. See https://developer.mozilla.org/en-US/docs/Web/API/DataTransferItem/webkitGetAsEntry
+          const item = items[i].getAsEntry
+            ? // @ts-ignore
+              items[i].getAsEntry()
+            : items[i].webkitGetAsEntry();
           if (item) {
             handleDroppedItem(item);
           }
@@ -146,7 +241,7 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
       [refKey]: inputElement,
       type: "file",
       multiple: multiple,
-      onchange: handleSelectedItems(),
+      onchange: handleSelectedItems(addItem(setItems, getItemIds, setItemIds)),
       ...rest,
     };
   };
@@ -161,7 +256,8 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
   // state we want to manage.
   const [getDragging, setDragging] = createSignal(false);
   const [getLastDrag, setLastDrag] = createSignal(Date.now());
-  const [getItems, setItems] = createSignal<(FileSystemEntry | File)[]>([]);
+  const [getItems, setItems] = createSignal<Item[]>([]);
+  const [getItemIds, setItemIds] = createSignal<ItemIds>(new Set());
 
   // Finally, we need to attach all kinds of event handlers.
   element.addEventListener("dragenter", onDragEnter(setDragging, setLastDrag));
@@ -172,7 +268,10 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
   element.addEventListener("dragover", onDragOver());
   element.addEventListener(
     "drop",
-    onDrop(setDragging, handleDroppedItem(setItems)),
+    onDrop(
+      setDragging,
+      handleDroppedItem(addItem(setItems, getItemIds, setItemIds)),
+    ),
   );
 
   return {
