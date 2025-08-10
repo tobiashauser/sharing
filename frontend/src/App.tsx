@@ -1,3 +1,4 @@
+import { FiUpload } from "solid-icons/fi";
 import {
   createEffect,
   JSX,
@@ -5,12 +6,9 @@ import {
   ParentProps,
   type Component,
 } from "solid-js";
-
-import { FiUpload } from "solid-icons/fi";
-
 import "./App.css";
 import { dropzone } from "./components/drop-zone/dropzone";
-
+import { Droparea } from "./Droparea";
 import { cn } from "./prelude";
 
 const WithBorder: ParentComponent = (props) => {
@@ -94,8 +92,16 @@ const App: Component = () => {
 
   createEffect(() => {
     // console.log("isDragging", getDragging());
-    console.log("items", getItems());
+    // console.log("items", getItems());
   });
+
+  return (
+    <div class="w-md h-40 m-12">
+      {/* The height and width are specified in the parent. The
+      component itself always takes as much space as possible. */}
+      <Droparea dragging={getDragging} />
+    </div>
+  );
 
   return (
     <>
@@ -116,11 +122,7 @@ const App: Component = () => {
           {/* Add enough margin for the shadow and explicitely set the
           height and width, otherwise the blue border with an
           increased width will grow the entire element.  */}
-          <DropArea
-            class="m-6 h-40 max-w-md w-2/3"
-            isDragging={getDragging()}
-            onclick={openFileDialog}
-          />
+          <span>UPLOAD FILES</span>
         </div>
         {/* Set the width of each cell with `auto-cols'. */}
         <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
