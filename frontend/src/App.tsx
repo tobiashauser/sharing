@@ -5,8 +5,6 @@ import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
 import { Itemcard } from "./Itemcard";
 
-import * as gsapPlayground from "./playground/gsap/Main";
-
 // The main entrypoint into the app. This component is reponsible to
 // manage state and build the layout of the components. Don't push any
 // top-level layout logic into other components.
@@ -24,8 +22,6 @@ const App: Component = () => {
   setTimeout(() => {
     bindInputElement(inputRef);
   });
-
-  return <gsapPlayground.Main />;
 
   return (
     <>
