@@ -1,8 +1,11 @@
 import { For, type Component } from "solid-js";
 import "./App.css";
+import { Code } from "./Code";
 import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
 import { Itemcard } from "./Itemcard";
+
+import * as gsapPlayground from "./playground/gsap/Main";
 
 // The main entrypoint into the app. This component is reponsible to
 // manage state and build the layout of the components. Don't push any
@@ -22,6 +25,8 @@ const App: Component = () => {
     bindInputElement(inputRef);
   });
 
+  return <gsapPlayground.Main />;
+
   return (
     <>
       {/* This is needed as a target for the drop zone. */}
@@ -31,8 +36,8 @@ const App: Component = () => {
         ref={inputRef}
       />
       {/* This div covers the entire viewport. It has the standard padding-2 on all sides. */}
-      <div class="flex justify-between">
-        <span class="bg-red-200">ENTER CODE</span>
+      <div class="mx-2 mt-2 flex justify-between">
+        <Code />
         <span class="bg-red-200">HELP</span>
       </div>
       {/* The top margin depends on the height and width of the viewport. */}
