@@ -24,12 +24,6 @@ const App: Component = () => {
   });
 
   return (
-    <div class="m-10 flex border border-dashed">
-      <Code />
-    </div>
-  );
-
-  return (
     <>
       {/* This is needed as a target for the drop zone. */}
       <input

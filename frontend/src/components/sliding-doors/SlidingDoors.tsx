@@ -1,7 +1,9 @@
 import gsap from "gsap";
-import { createSignal, JSX } from "solid-js";
+import { JSX } from "solid-js";
 
-type SceneValue = {
+type Callbacks = Map<gsap.CallbackType, gsap.Callback>;
+
+type Animation = {
   constructor: (
     targets: gsap.TweenTarget,
     vars: gsap.TweenVars,
@@ -11,9 +13,58 @@ type SceneValue = {
   position?: gsap.Position;
 };
 
-export type Scene = SceneValue[];
+export class Scene {
+  private _animations: Animation[] = [];
 
-export class _Scene {}
+  // Keep track of the animations up to which `ease' has been applied.
+  private _easeIdx: number | undefined = undefined;
+
+  // A timeline object can have various callbacks.
+  private _callbacks: Callbacks = new Map();
+
+  stage(
+    name: string,
+    animations: Animation[] = [],
+    vars: gsap.TweenVars = {},
+  ): Scene {
+    animations.forEach((animation) => {
+      animation.position = name;
+      animation.vars = { ...vars, ...animation.vars };
+      this._animations.push(animation);
+    });
+    return this;
+  }
+
+  // Applies EASE to all added animations since the last call to `withEase'.
+  withEase(ease: string): Scene {
+    if (this._animations.length == 0) return this;
+
+    while ((this._easeIdx ?? 0) < this._animations.length) {
+      this._animations[this._easeIdx ?? 0].vars = {
+        ease: ease,
+        ...this._animations[this._easeIdx ?? 0].vars,
+      };
+      this._easeIdx = (this._easeIdx ?? 0) + 1;
+    }
+
+    return this;
+  }
+
+  // Add a callback to the created timeline.
+  private callback(event: gsap.CallbackType, callback: gsap.Callback) {
+    this._callbacks.set(event, callback);
+  }
+
+  // Provide various callback types.
+  onComplete(callback: gsap.Callback): Scene {
+    this.callback("onComplete", callback);
+    return this;
+  }
+
+  animate() {
+    runAnimations(this._animations, this._callbacks);
+  }
+}
 
 // Actually use a class to provide proper typing.
 export class ID {
@@ -31,8 +82,12 @@ export class ID {
     return `#${this._value}`;
   }
 
+  get element(): HTMLElement | null {
+    return document.getElementById(this.selector);
+  }
+
   // A simple wrapper around `gsap.to'.
-  to(vars: gsap.TweenVars, position?: gsap.Position): SceneValue {
+  to(vars: gsap.TweenVars, position?: gsap.Position): Animation {
     return {
       constructor: gsap.to,
       targets: this.selector,
@@ -42,18 +97,19 @@ export class ID {
   }
 }
 
-// A convenience constructure for STATE.
-// NOT NEEDED since the change to an array.
-export function newScene(build: (scene: Scene) => void): Scene {
-  const scene: Scene = new Array();
-  build(scene);
-  return scene;
-}
-
 // A convenience function that applies state.
-export function animateScene(scene: Scene) {
+export function runAnimations(animations: Animation[], callbacks?: Callbacks) {
   const tl = gsap.timeline();
-  for (const { constructor, targets, vars, position } of scene) {
+
+  // Add the callbacks to the timeline.
+  if (callbacks) {
+    for (const [event, callback] of callbacks) {
+      tl.eventCallback(event, callback);
+    }
+  }
+
+  // Add the animations to the timeline.
+  for (const { constructor, targets, vars, position } of animations) {
     const tween = constructor(targets, vars);
     tl.add(tween, position);
   }
@@ -61,7 +117,6 @@ export function animateScene(scene: Scene) {
 
 interface SlidingDoorsAttributes {
   children?: JSX.Element;
-  scenes?: Scene[];
   fix?: "left" | "center" | "right";
 }
 
@@ -70,24 +125,9 @@ interface SlidingDoorsAttributes {
 // container so that it will only take up as much horizontal space as
 // needed.
 export function SlidingDoors(props: SlidingDoorsAttributes): JSX.Element {
-  const { children, scenes, fix } = props;
-  const [currentScene, setCurrentScene] = createSignal<number | undefined>(
-    undefined,
-  );
-
-  const nextScene = () => {
-    console.log("next scene");
-    if (!scenes) return;
-    if (scenes.length === 0) return;
-
-    const nextScene = ((currentScene() ?? -1) + 1) % scenes.length;
-    animateScene(scenes[nextScene]);
-    setCurrentScene(nextScene);
-  };
-
+  const { children, fix } = props;
   return (
     <div
-      onclick={nextScene}
       classList={{
         flex: true,
         "border-blue-400 border-2": false,

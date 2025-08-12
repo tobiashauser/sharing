@@ -1,7 +1,1 @@
-export {
-  ID,
-  SlidingDoors,
-  animateScene,
-  newScene,
-  type Scene,
-} from "./SlidingDoors";
+export { ID, Scene, SlidingDoors, runAnimations } from "./SlidingDoors";
