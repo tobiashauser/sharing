@@ -92,12 +92,17 @@ function addItem(
   setItems: Setter<Item[]>,
   getItemIds: Accessor<ItemIds>,
   setItemIds: Setter<ItemIds>,
+  onItemAdded?: (item: Item) => void,
 ) {
   return (item: Item) => {
     const id = createId(item);
     if (!getItemIds().has(id)) {
       setItemIds((prev) => prev.add(id));
       setItems((prev) => [...prev, item]);
+
+      if (onItemAdded) {
+        onItemAdded(item);
+      }
     }
   };
 }
@@ -239,7 +244,11 @@ function onDragOver(): EventListener {
 /// dropzone
 //
 //  This is the main function that kickstart the creation of a dropzone.
-export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
+export function dropzone(
+  element: Window | HTMLElement,
+  multiple?: boolean,
+  onItemAdded?: (item: Item) => void,
+) {
   // The dropzone must be connected to a <input> element. This
   // requires a bit of a convoluated setup in which we return a setter
   // that must be called inside `setTimout'.
@@ -259,7 +268,9 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
       [refKey]: inputElement,
       type: "file",
       multiple: multiple,
-      onchange: handleSelectedItems(addItem(setItems, getItemIds, setItemIds)),
+      onchange: handleSelectedItems(
+        addItem(setItems, getItemIds, setItemIds, onItemAdded),
+      ),
       ...rest,
     };
   };
@@ -288,7 +299,7 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
     "drop",
     onDrop(
       setDragging,
-      handleDroppedItem(addItem(setItems, getItemIds, setItemIds)),
+      handleDroppedItem(addItem(setItems, getItemIds, setItemIds, onItemAdded)),
     ),
   );
 

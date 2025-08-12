@@ -1,7 +1,7 @@
 import { createSignal, For, type Component } from "solid-js";
 import "./App.css";
 import { Code, State } from "./Code";
-import { dropzone } from "./components/drop-zone";
+import { dropzone, Item, uploadFile } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
 import { Info } from "./Info";
 import { Itemcard } from "./Itemcard";
@@ -17,7 +17,11 @@ const App: Component = () => {
     getItems,
     removeItem,
     openFileDialog,
-  } = dropzone(window, true);
+  } = dropzone(window, true, (item: Item) => {
+    if (item instanceof File) {
+      uploadFile("/upload")(item);
+    }
+  });
 
   const appState = createSignal(State.dropFiles);
   const shareCode = createSignal<string | undefined>(undefined);

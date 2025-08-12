@@ -11,7 +11,7 @@
 
 (defvar *acceptor*
   (make-instance 'hunchentoot:easy-acceptor
-		 :port 5173
+		 :port 3000
 		 :document-root #p"frontend/dist/"))
 
 (hunchentoot:define-easy-handler (upload :uri "/upload" :default-request-type "POST") ()
