@@ -25,7 +25,7 @@ const App: Component = () => {
   });
 
   return (
-    <>
+    <div class="m-2">
       {/* This is needed as a target for the drop zone. */}
       <input
         {...configureInputElement({ refKey: "ref" })}
@@ -33,13 +33,13 @@ const App: Component = () => {
         ref={inputRef}
       />
       {/* This div covers the entire viewport. It has the standard padding-2 on all sides. */}
-      <div class="mx-2 mt-2 flex justify-between">
+      <div class="flex justify-between">
         <Code />
         <Info />
         {/* <span class="bg-red-200">HELP</span> */}
       </div>
       {/* The top margin depends on the height and width of the viewport. */}
-      <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,20vh)]">
+      <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
         <div class="flex justify-center">
           {/* Add enough margin for the shadow and explicitely set the
           height and width, otherwise the blue border with an
@@ -59,7 +59,7 @@ const App: Component = () => {
           <For each={getItems()}>{(item) => <Itemcard item={item} />}</For>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
