@@ -1,7 +1,17 @@
 import gsap from "gsap";
-import { JSX } from "solid-js";
+import { createSignal, JSX } from "solid-js";
 
-export type Frame = Map<gsap.TweenTarget | ID, gsap.TweenVars>;
+type SceneValue = {
+  constructor: (
+    targets: gsap.TweenTarget,
+    vars: gsap.TweenVars,
+  ) => gsap.core.Tween;
+  targets: gsap.TweenTarget;
+  vars: gsap.TweenVars;
+  position?: gsap.Position;
+};
+
+export type Scene = SceneValue[];
 
 // Actually use a class to provide proper typing.
 export class ID {
@@ -18,44 +28,72 @@ export class ID {
   get selector(): string {
     return `#${this._value}`;
   }
+
+  // A simple wrapper around `gsap.to'.
+  to(vars: gsap.TweenVars, position?: gsap.Position): SceneValue {
+    return {
+      constructor: gsap.to,
+      targets: this.selector,
+      vars: vars,
+      position: position,
+    };
+  }
 }
 
 // A convenience constructure for STATE.
-export function createFrame(build: (frame: Frame) => void): Frame {
-  const frame = new Map<gsap.TweenTarget | ID, gsap.TweenVars>();
-  build(frame);
-  return frame;
+export function newScene(build: (scene: Scene) => void): Scene {
+  const scene: Scene = new Array();
+  build(scene);
+  return scene;
 }
 
 // A convenience function that applies state.
-function modulateFrame(
-  modulate: (target: gsap.TweenTarget, vars: gsap.TweenVars) => void,
-) {
-  return (frame: Frame) => {
-    for (const [target, vars] of frame) {
-      modulate(target instanceof ID ? target.selector : target, vars);
-    }
-  };
-}
-
-export function setFrame(frame: Frame) {
-  return () => {
-    modulateFrame(gsap.set)(frame);
-  };
-}
-
-export function toFrame(frame: Frame) {
-  return () => {
-    modulateFrame(gsap.to)(frame);
-  };
+export function animateScene(scene: Scene) {
+  const tl = gsap.timeline();
+  for (const { constructor, targets, vars, position } of scene) {
+    const tween = constructor(targets, vars);
+    tl.add(tween, position);
+  }
 }
 
 interface SlidingDoorsAttributes {
   children?: JSX.Element;
+  scenes?: Scene[];
+  fix?: "left" | "center" | "right";
 }
 
 // Unfortunately, providing an initial frame with `setFrame' leads to
-// to jumps in each last frame.
+// to jumps in each last frame. Put the <SlidingDoors> in a flex
+// container so that it will only take up as much horizontal space as
+// needed.
 export function SlidingDoors(props: SlidingDoorsAttributes): JSX.Element {
-  return <div class="inline-flex overflow-hidden">{props.children}</div>;
+  const { children, scenes, fix } = props;
+  const [currentScene, setCurrentScene] = createSignal<number | undefined>(
+    undefined,
+  );
+
+  const nextScene = () => {
+    console.log("next scene");
+    if (!scenes) return;
+    if (scenes.length === 0) return;
+
+    const nextScene = ((currentScene() ?? -1) + 1) % scenes.length;
+    animateScene(scenes[nextScene]);
+    setCurrentScene(nextScene);
+  };
+
+  return (
+    <div
+      onclick={nextScene}
+      classList={{
+        flex: true,
+        "border-blue-400 border-2": false,
+        "justify-start": fix === "left",
+        "justify-center": fix === "center",
+        "justify-end": fix === "right",
+      }}
+    >
+      {children}
+    </div>
+  );
 }

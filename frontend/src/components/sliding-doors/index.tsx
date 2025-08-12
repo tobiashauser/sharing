@@ -1,7 +1,7 @@
 export {
   ID,
   SlidingDoors,
-  createFrame,
-  toFrame,
-  type Frame,
+  animateScene,
+  newScene,
+  type Scene,
 } from "./SlidingDoors";

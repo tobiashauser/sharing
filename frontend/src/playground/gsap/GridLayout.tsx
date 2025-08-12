@@ -23,21 +23,8 @@ export function GridLayout(): JSX.Element {
   });
 
   return (
-    <div class="border-black inline-flex overflow-hidden border-2">
-      <div ref={fst} class="bg-blue-400" />
-      <span ref={snd} id="target" class="bg-red-400">
-        Enter Code
-      </span>
-      <span ref={thd} id="" class="bg-orange-400">
-        Code
-      </span>
-      <div ref={four} class="bg-green-400" />
-    </div>
-  );
-
-  return (
     <div
-      class="border-black border-2"
+      class="m-10 border-black border-2"
       style={{
         display: "inline-grid",
       }}

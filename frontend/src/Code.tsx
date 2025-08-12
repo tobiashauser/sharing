@@ -1,11 +1,6 @@
 import { FiDownload } from "solid-icons/fi";
 import { JSX } from "solid-js";
-import {
-  ID,
-  SlidingDoors,
-  createFrame,
-  toFrame,
-} from "./components/sliding-doors";
+import { ID, SlidingDoors } from "./components/sliding-doors";
 import "./convenience.css";
 
 export function Code(): JSX.Element {
@@ -15,34 +10,32 @@ export function Code(): JSX.Element {
   const label = new ID();
   const code = new ID();
 
-  let enterCode = createFrame((frame) => {
-    frame.set(input, { width: 0 });
-    frame.set(button, { width: "auto" });
-    frame.set(icon, { width: 0 });
-    frame.set(label, { width: 0 });
-    frame.set(code, { width: 0 });
-  });
+  // let enterCode = createFrame((frame) => {
+  //   frame.set(input, { width: 0 });
+  //   frame.set(button, { width: "auto" });
+  //   frame.set(icon, { width: 0 });
+  //   frame.set(label, { width: 0 });
+  //   frame.set(code, { width: 0 });
+  // });
 
-  let inputCode = createFrame((frame) => {
-    frame.set(input, { width: "auto" });
-    frame.set(button, { width: 0 });
-    frame.set(icon, { width: "auto" });
-    frame.set(label, { width: 0 });
-    frame.set(code, { width: 0 });
-  });
+  // let inputCode = createFrame((frame) => {
+  //   frame.set(input, { width: "auto" });
+  //   frame.set(button, { width: 0 });
+  //   frame.set(icon, { width: "auto" });
+  //   frame.set(label, { width: 0 });
+  //   frame.set(code, { width: 0 });
+  // });
 
-  let showCode = createFrame((frame) => {
-    frame.set(input, { width: 0 });
-    frame.set(button, { width: 0 });
-    frame.set(icon, { width: 0 });
-    frame.set(label, { width: "auto" });
-    frame.set(code, { width: "auto" });
-  });
+  // let showCode = createFrame((frame) => {
+  //   frame.set(input, { width: 0 });
+  //   frame.set(button, { width: 0 });
+  //   frame.set(icon, { width: 0 });
+  //   frame.set(label, { width: "auto" });
+  //   frame.set(code, { width: "auto" });
+  // });
 
   return (
     <>
-      <button onclick={toFrame(showCode)}>show code</button>
-      <button onclick={toFrame(enterCode)}>enter code</button>
       <div class="border-slate-600 rounded-sm shadow overflow-hidden border">
         <SlidingDoors>
           {/* The input element to enter a download code. */}
@@ -57,7 +50,6 @@ export function Code(): JSX.Element {
           <span
             id={button.id}
             class="text-white bg-slate-600 text-sm py-1 cursor-pointer truncate overflow-hidden"
-            onclick={toFrame(inputCode)}
           >
             Enter Code
           </span>
@@ -66,7 +58,6 @@ export function Code(): JSX.Element {
           <div
             id={icon.id}
             class="text-white bg-slate-600 flex cursor-pointer items-center"
-            onclick={toFrame(enterCode)}
             style={{ width: 0 }}
           >
             <FiDownload class="size-5" />

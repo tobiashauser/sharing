@@ -1,50 +1,40 @@
-import { createSignal } from "solid-js";
-import {
-  createFrame,
-  SlidingDoors,
-  toFrame,
-} from "../components/sliding-doors";
+// Proof of concept for <SlidingDoors>
+import { ID, newScene, Scene, SlidingDoors } from "../components/sliding-doors";
 
 export function SlidingDoorsTest() {
-  const frames = Array.from({ length: 9 }, (_, i) => {
-    const one = ["#red", "#blue", "#green"][i % 3];
-    const two = ["#red", "#blue", "#green"][(i + 1) % 3];
-    const three = ["#red", "#blue", "#green"][(i + 2) % 3];
-    return createFrame((frame) => {
-      frame.set(one, { width: (i + 2) * 10 });
-      frame.set(two, { width: (i + 1) * 10 });
-      frame.set(three, { width: i * 10 });
-    });
-  });
+  const red = new ID();
+  const blue = new ID();
+  const hello = new ID();
 
-  const [idx, setIdx] = createSignal(0);
+  const scenes: Scene[] = [
+    newScene((s) => {
+      s.push(red.to({ width: "180px" }));
+      s.push(blue.to({ width: "40px" }));
+      s.push(hello.to({ autoAlpha: 1 }));
+    }),
+
+    // See special values for the position parameter her:
+    // https://gsap.com/docs/v3/GSAP/Timeline
+    newScene((s) => {
+      s.push(hello.to({ autoAlpha: 0 }, 0));
+      s.push(red.to({ width: "40px" }, "1"));
+      s.push(blue.to({ width: "180px" }, "<"));
+    }),
+  ];
 
   return (
-    <div class="m-4 border">
-      <div class="flex">
-        <div class="border-black rounded-xl overflow-hidden border-2">
-          <SlidingDoors>
-            <div id="red" class="bg-red-400 py-4">
-              RED
-            </div>
-            <div id="blue" class="bg-blue-400 py-4">
-              BLUE
-            </div>
-            <div id="green" class="bg-green-400 py-4">
-              GREEN
-            </div>
-          </SlidingDoors>
+    <div class="m-10">
+      <SlidingDoors scenes={scenes} fix="left">
+        <div class="border-black rounded-xl flex overflow-hidden border-4">
+          <div id={red.id} class="bg-red-400 py-2 flex w-[40px] justify-center">
+            <p id={hello.id} class="invisible truncate text-clip opacity-0">
+              Hello, world!
+            </p>
+          </div>
+          <div id={blue.id} class="bg-blue-400 w-[180px]" />
+          <div class="bg-green-400 w-[40px]" />
         </div>
-      </div>
-
-      <button
-        onclick={() => {
-          toFrame(frames[idx() % frames.length]);
-          setIdx((prev) => prev + 1);
-        }}
-      >
-        next
-      </button>
+      </SlidingDoors>
     </div>
   );
 }
