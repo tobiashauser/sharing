@@ -1,7 +1,7 @@
-import { Code, State } from "#ui/Code";
-import { Droparea } from "#ui/Droparea";
-import { Info } from "#ui/Info";
-import { Itemcard } from "#ui/Itemcard";
+import { Code, State } from "#ui/code";
+import Droparea from "#ui/DropArea";
+import Info from "#ui/Info";
+import { ItemCard } from "#ui/item-card";
 import { createSignal, For, type Component } from "solid-js";
 import { dropzone } from "~/components/drop-zone";
 import "./App.css";
@@ -64,7 +64,7 @@ const App: Component = () => {
         {/* Set the width of each cell with `auto-cols'. */}
         <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <For each={getItems()}>
-            {(item) => <Itemcard item={item} remove={removeItem(item)} />}
+            {(item) => <ItemCard item={item} remove={removeItem(item)} />}
           </For>
         </div>
       </div>

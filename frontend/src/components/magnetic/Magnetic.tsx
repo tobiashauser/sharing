@@ -46,3 +46,5 @@ export function Magnetic(props: MagnetInterface) {
 
   return <div ref={ref}>{props.children}</div>;
 }
+
+export default Magnetic;
