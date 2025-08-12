@@ -4,7 +4,6 @@ import { Code } from "./Code";
 import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
 import { Itemcard } from "./Itemcard";
-import { SlidingDoorsTest } from "./playground/sliding-doors";
 
 // The main entrypoint into the app. This component is reponsible to
 // manage state and build the layout of the components. Don't push any
@@ -24,7 +23,11 @@ const App: Component = () => {
     bindInputElement(inputRef);
   });
 
-  return <SlidingDoorsTest />;
+  return (
+    <div class="m-10 flex border border-dashed">
+      <Code />
+    </div>
+  );
 
   return (
     <>

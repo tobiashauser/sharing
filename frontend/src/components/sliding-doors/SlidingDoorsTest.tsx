@@ -1,5 +1,5 @@
 // Proof of concept for <SlidingDoors>
-import { ID, newScene, Scene, SlidingDoors } from "../components/sliding-doors";
+import { ID, newScene, Scene, SlidingDoors } from "./SlidingDoors";
 
 export function SlidingDoorsTest() {
   const red = new ID();

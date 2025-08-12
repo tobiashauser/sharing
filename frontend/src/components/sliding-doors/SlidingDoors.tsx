@@ -41,6 +41,7 @@ export class ID {
 }
 
 // A convenience constructure for STATE.
+// NOT NEEDED since the change to an array.
 export function newScene(build: (scene: Scene) => void): Scene {
   const scene: Scene = new Array();
   build(scene);

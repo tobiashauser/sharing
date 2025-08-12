@@ -1,87 +1,109 @@
 import { FiDownload } from "solid-icons/fi";
-import { JSX } from "solid-js";
-import { ID, SlidingDoors } from "./components/sliding-doors";
+import { JSX, onMount } from "solid-js";
+import {
+  animateScene,
+  ID,
+  Scene,
+  SlidingDoors,
+} from "./components/sliding-doors";
 import "./convenience.css";
 
 export function Code(): JSX.Element {
+  // We need a whole bunch of IDs to reference everthing.
   const input = new ID();
+  const inputContent = new ID();
+
   const button = new ID();
+  const buttonContent = new ID();
+
   const icon = new ID();
-  const label = new ID();
+  const iconContent = new ID();
+
+  const codeLabel = new ID();
+  const codeLabelContent = new ID();
+
   const code = new ID();
+  const codeContent = new ID();
 
-  // let enterCode = createFrame((frame) => {
-  //   frame.set(input, { width: 0 });
-  //   frame.set(button, { width: "auto" });
-  //   frame.set(icon, { width: 0 });
-  //   frame.set(label, { width: 0 });
-  //   frame.set(code, { width: 0 });
-  // });
+  const showInput: Scene = [
+    // Remove all content.
+    buttonContent.to({ autoAlpha: 0 }, "remove"),
+    // Change all sizes.
+    input.to({ width: "auto" }, "resize"),
+    button.to({ width: 0 }, "resize"),
+    icon.to({ width: "auto" }, "resize"),
+    // Show the contents.
+    inputContent.to({ autoAlpha: 1 }, "insert"),
+    iconContent.to({ autoAlpha: 1 }, "insert"),
+  ];
 
-  // let inputCode = createFrame((frame) => {
-  //   frame.set(input, { width: "auto" });
-  //   frame.set(button, { width: 0 });
-  //   frame.set(icon, { width: "auto" });
-  //   frame.set(label, { width: 0 });
-  //   frame.set(code, { width: 0 });
-  // });
+  const showCode: Scene = [
+    // Remove all content.
+    buttonContent.to({ autoAlpha: 0 }, "remove"),
+    // Change all sizes.
+    button.to({ width: 0 }, "resize"),
+    codeLabel.to({ width: "auto" }, "resize"),
+    code.to({ width: "auto" }, "resize"),
+    // Show the content again.
+    codeLabelContent.to({ autoAlpha: 1 }, "insert"),
+    codeContent.to({ autoAlpha: 1 }, "insert"),
+  ];
 
-  // let showCode = createFrame((frame) => {
-  //   frame.set(input, { width: 0 });
-  //   frame.set(button, { width: 0 });
-  //   frame.set(icon, { width: 0 });
-  //   frame.set(label, { width: "auto" });
-  //   frame.set(code, { width: "auto" });
-  // });
+  onMount(() => {
+    animateScene(showInput);
+    animateScene(showCode);
+  });
 
   return (
-    <>
-      <div class="border-slate-600 rounded-sm shadow overflow-hidden border">
-        <SlidingDoors>
-          {/* The input element to enter a download code. */}
+    <SlidingDoors>
+      <div class="border-red-400 inline-flex items-center border-2">
+        {/* The input element to enter a download code. */}
+        <div id={input.id} class="w-0">
           <input
-            id={input.id}
+            id={inputContent.id}
             type="text"
             placeholder="Enter Code"
-            style={{ width: 0 }}
+            class="text=sm placeholder:text-sm caret-slate-600"
           />
+        </div>
 
-          {/* That is the button that should be shown initially. */}
-          <span
-            id={button.id}
-            class="text-white bg-slate-600 text-sm py-1 cursor-pointer truncate overflow-hidden"
-          >
+        {/* That is the button that should be shown initially. */}
+        <div
+          id={button.id}
+          class="text-white py-1 bg-slate-600 text-sm truncate text-clip"
+        >
+          <span id={buttonContent.id} class="px-2">
             Enter Code
           </span>
+        </div>
 
-          {/* Here we have the download icon. It is shown when entering a code. */}
-          <div
-            id={icon.id}
-            class="text-white bg-slate-600 flex cursor-pointer items-center"
-            style={{ width: 0 }}
-          >
+        {/* Here we have the download icon. It is shown when entering a code. */}
+        <div
+          id={icon.id}
+          class="text-white py-1 bg-slate-600 w-0 truncate text-clip"
+        >
+          <div id={iconContent.id} class="px-2 invisible opacity-0">
             <FiDownload class="size-5" />
           </div>
+        </div>
 
-          {/* We must also show the code if files should be sent. */}
-          <span
-            id={label.id}
-            class="text-white bg-slate-600 text-sm truncate overflow-hidden"
-            style={{ width: 0 }}
-          >
+        {/* We must also show the code if files should be sent. */}
+        <div
+          id={codeLabel.id}
+          class="text-white py-1 bg-slate-600 text-sm w-0 truncate text-clip"
+        >
+          <span id={codeLabelContent.id} class="px-2 invisible opacity-0">
             Code
           </span>
+        </div>
 
-          <span
-            id={code.id}
-            class="text-sm truncate overflow-hidden"
-            style={{ width: 0 }}
-          >
+        <div id={code.id} class="text-sm w-0 truncate text-clip">
+          <span id={codeContent.id} class="px-2 invisible opacity-0">
             modern-woodlouse
           </span>
-        </SlidingDoors>
+        </div>
       </div>
-    </>
+    </SlidingDoors>
   );
 
   // return (
