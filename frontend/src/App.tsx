@@ -3,6 +3,7 @@ import "./App.css";
 import { Code } from "./Code";
 import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
+import { Info } from "./Info";
 import { Itemcard } from "./Itemcard";
 
 // The main entrypoint into the app. This component is reponsible to
@@ -34,7 +35,8 @@ const App: Component = () => {
       {/* This div covers the entire viewport. It has the standard padding-2 on all sides. */}
       <div class="mx-2 mt-2 flex justify-between">
         <Code />
-        <span class="bg-red-200">HELP</span>
+        <Info />
+        {/* <span class="bg-red-200">HELP</span> */}
       </div>
       {/* The top margin depends on the height and width of the viewport. */}
       <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,20vh)]">
