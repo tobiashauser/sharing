@@ -1,7 +1,7 @@
 import { FiDownload } from "solid-icons/fi";
 import { createEffect, JSX, Signal } from "solid-js";
-import { ID, Scene, SlidingDoors } from "./components/sliding-doors";
-import "./convenience.css";
+import { ID, Scene, SlidingDoors } from "~/components/sliding-doors";
+import "~/lib/convenience.css";
 
 export enum State {
   dropFiles,

@@ -12,6 +12,7 @@
   "license": "MIT",
   "devDependencies": {
     "clsx": "^2.1.1",
+    "path": "^0.12.7",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
     "prettier-plugin-tailwindcss": "^0.6.14",

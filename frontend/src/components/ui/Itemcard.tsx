@@ -10,8 +10,8 @@ import {
   FaSolidFolder,
   FaSolidXmark,
 } from "solid-icons/fa";
-import { createSignal } from "solid-js";
-import { Folder, Item } from "./components/drop-zone";
+import { createSignal, onMount } from "solid-js";
+import { Folder, Item } from "~/components/drop-zone";
 
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
@@ -90,6 +90,11 @@ function Icon({ item }: IconAttributes) {
   }
 }
 
+/// Itemcard
+
+// This component displays an item to be shared. It initiates the
+// upload and provides visual feedback.
+
 interface ItemcardAttributes {
   item: Item;
   remove: EventListener;
@@ -97,8 +102,13 @@ interface ItemcardAttributes {
 
 export function Itemcard(props: ItemcardAttributes) {
   const { item, remove } = props;
-
   const [hovering, setHovering] = createSignal(false);
+
+  // (Ab)use `onMount' to initiate the upload. This hook is only called
+  // once when the component is first rendered.
+  onMount(() => {
+    console.log(item.name);
+  });
 
   return (
     <div

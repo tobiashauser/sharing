@@ -1,10 +1,10 @@
+import { Code, State } from "#ui/Code";
+import { Droparea } from "#ui/Droparea";
+import { Info } from "#ui/Info";
+import { Itemcard } from "#ui/Itemcard";
 import { createSignal, For, type Component } from "solid-js";
+import { dropzone } from "~/components/drop-zone";
 import "./App.css";
-import { Code, State } from "./Code";
-import { dropzone, Item, uploadFile } from "./components/drop-zone";
-import { Droparea } from "./Droparea";
-import { Info } from "./Info";
-import { Itemcard } from "./Itemcard";
 
 // The main entrypoint into the app. This component is reponsible to
 // manage state and build the layout of the components. Don't push any
@@ -17,17 +17,13 @@ const App: Component = () => {
     getItems,
     removeItem,
     openFileDialog,
-  } = dropzone(window, true, (item: Item) => {
-    if (item instanceof File) {
-      uploadFile("/upload")(item);
-    }
-  });
+  } = dropzone(window, true);
 
   const appState = createSignal(State.dropFiles);
   const shareCode = createSignal<string | undefined>(undefined);
 
-  const [currentAppState, setAppState] = appState;
-  const [getShareCode, setShareCode] = shareCode;
+  // const [currentAppState, setAppState] = appState;
+  // const [getShareCode, setShareCode] = shareCode;
 
   // Finish the setup for the window drop zone.
   let inputRef!: HTMLInputElement;

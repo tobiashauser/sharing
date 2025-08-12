@@ -1,10 +1,10 @@
 import { BsSendFill } from "solid-icons/bs";
 import { FiShare } from "solid-icons/fi";
 import { Accessor, createSignal, JSX, Match, Switch } from "solid-js";
-import { Item } from "./components/drop-zone";
-import { ZStack } from "./components/zstack";
-import "./convenience.css";
-import { Magnetic } from "./Magnetic";
+import { Item } from "~/components/drop-zone";
+import { Magnetic } from "~/components/magnetic";
+import { ZStack } from "~/components/zstack";
+import "~/lib/convenience.css";
 
 interface DropareaAttributes {
   dragging: Accessor<boolean>;
