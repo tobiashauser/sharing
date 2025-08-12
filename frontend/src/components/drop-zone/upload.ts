@@ -12,24 +12,35 @@ function formData(payload: File): FormData {
 
 // The state of a request can be managed with callbacks (as usual..).
 
-// The 'progress' event is fired periodically when a request receives more data.
-function handleRequestProgress(e: ProgressEvent) {
-  console.log("progress:", e);
+function handleRequestAbort(e: ProgressEvent) {
+  console.log("abort");
+}
+
+function handleRequestError(e: ProgressEvent) {
+  console.log("error");
 }
 
 // The 'load' event is fired when an XMLHttpRequest transaction completes successfully.
+// This is called before `handleReqeustLoadEnd'.
 function handleRequestLoad(e: ProgressEvent) {
-  console.log("finished upload:", e);
+  console.log("finished upload");
 }
 
-// 'error'
-function handleRequestError(e: ProgressEvent) {
-  console.log("error:", e);
+function handleRequestLoadStart(e: ProgressEvent) {
+  console.log("starting upload");
 }
 
-// 'abort'
-function handleRequestAbort(e: ProgressEvent) {
-  console.log("abort", e);
+function handleRequestLoadEnd(e: ProgressEvent) {
+  console.log("ended upload");
+}
+
+// The 'progress' event is fired periodically when a request receives more data.
+function handleRequestProgress(e: ProgressEvent) {
+  console.log("progress");
+}
+
+function handleRequestTimeout(e: ProgressEvent) {
+  console.log("timed out");
 }
 
 /// API
@@ -42,10 +53,13 @@ export function uploadFile(address: string) {
 
     // Create and configure the request.
     const request = new XMLHttpRequest();
-    request.upload.onprogress = handleRequestProgress;
-    request.upload.onload = handleRequestLoad;
-    request.upload.onerror = handleRequestError;
     request.upload.onabort = handleRequestAbort;
+    request.upload.onerror = handleRequestError;
+    request.upload.onload = handleRequestLoad;
+    request.upload.onloadend = handleRequestLoadEnd;
+    request.upload.onloadstart = handleRequestLoadStart;
+    request.upload.onprogress = handleRequestProgress;
+    request.upload.ontimeout = handleRequestTimeout;
 
     // Finally, we need to open and send the configured request.
     request.open("POST", address, true);
