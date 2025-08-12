@@ -13,6 +13,8 @@ type SceneValue = {
 
 export type Scene = SceneValue[];
 
+export class _Scene {}
+
 // Actually use a class to provide proper typing.
 export class ID {
   private readonly _value: string;

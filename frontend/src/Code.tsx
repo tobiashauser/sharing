@@ -56,14 +56,14 @@ export function Code(): JSX.Element {
 
   return (
     <SlidingDoors>
-      <div class="border-red-400 inline-flex items-center border-2">
+      <div class="border-slate-600 inline-flex items-center border-2">
         {/* The input element to enter a download code. */}
         <div id={input.id} class="w-0">
           <input
             id={inputContent.id}
             type="text"
             placeholder="Enter Code"
-            class="text=sm placeholder:text-sm caret-slate-600"
+            class="text=sm placeholder:text-sm caret-slate-600 px-2"
           />
         </div>
 
