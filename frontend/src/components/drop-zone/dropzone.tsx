@@ -135,6 +135,24 @@ function handleSelectedItems(addFile: (file: File) => void): EventListener {
   };
 }
 
+function handleRemoveItem(
+  setItems: Setter<Item[]>,
+  setItemIds: Setter<ItemIds>,
+) {
+  return (item: Item) => {
+    return () => {
+      const id = createId(item);
+      setItems((prev) =>
+        prev.filter((storedItem) => createId(storedItem) !== id),
+      );
+      setItemIds((prev) => {
+        prev.delete(id);
+        return prev;
+      });
+    };
+  };
+}
+
 /// Events
 //
 //  The dropzone needs to configure various event handlers that handle
@@ -274,11 +292,15 @@ export function dropzone(element: Window | HTMLElement, multiple?: boolean) {
     ),
   );
 
+  // And resolve some handlers.
+  const removeItem = handleRemoveItem(setItems, setItemIds);
+
   return {
     bindInputElement,
     configureInputElement,
     getDragging,
     getItems,
+    removeItem,
     openFileDialog,
   };
 }

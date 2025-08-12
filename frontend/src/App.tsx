@@ -1,6 +1,6 @@
-import { For, type Component } from "solid-js";
+import { createSignal, For, type Component } from "solid-js";
 import "./App.css";
-import { Code } from "./Code";
+import { Code, State } from "./Code";
 import { dropzone } from "./components/drop-zone";
 import { Droparea } from "./Droparea";
 import { Info } from "./Info";
@@ -15,8 +15,15 @@ const App: Component = () => {
     configureInputElement,
     getDragging,
     getItems,
+    removeItem,
     openFileDialog,
   } = dropzone(window, true);
+
+  const appState = createSignal(State.dropFiles);
+  const shareCode = createSignal<string | undefined>(undefined);
+
+  const [currentAppState, setAppState] = appState;
+  const [getShareCode, setShareCode] = shareCode;
 
   // Finish the setup for the window drop zone.
   let inputRef!: HTMLInputElement;
@@ -34,7 +41,7 @@ const App: Component = () => {
       />
       {/* This div covers the entire viewport. It has the standard padding-2 on all sides. */}
       <div class="flex justify-between">
-        <Code />
+        <Code state={appState} shareCode={shareCode} />
         <Info />
         {/* <span class="bg-red-200">HELP</span> */}
       </div>
@@ -56,7 +63,9 @@ const App: Component = () => {
         </div>
         {/* Set the width of each cell with `auto-cols'. */}
         <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <For each={getItems()}>{(item) => <Itemcard item={item} />}</For>
+          <For each={getItems()}>
+            {(item) => <Itemcard item={item} remove={removeItem(item)} />}
+          </For>
         </div>
       </div>
     </div>

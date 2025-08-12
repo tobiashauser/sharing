@@ -92,10 +92,11 @@ function Icon({ item }: IconAttributes) {
 
 interface ItemcardAttributes {
   item: Item;
+  remove: EventListener;
 }
 
 export function Itemcard(props: ItemcardAttributes) {
-  const { item } = props;
+  const { item, remove } = props;
 
   const [hovering, setHovering] = createSignal(false);
 
@@ -117,7 +118,7 @@ export function Itemcard(props: ItemcardAttributes) {
         </div>
 
         <button
-          onclick={() => console.log("remove item")}
+          onclick={remove}
           classList={{
             "text-muted-foreground/80 rounded-full": true,
             "text-red-300 bg-red-100": hovering(),

@@ -1,17 +1,22 @@
 import { FiDownload } from "solid-icons/fi";
-import { createEffect, createSignal, JSX } from "solid-js";
+import { createEffect, JSX, Signal } from "solid-js";
 import { ID, Scene, SlidingDoors } from "./components/sliding-doors";
 import "./convenience.css";
 
 export enum State {
-  button,
-  code,
-  input,
+  dropFiles,
+  showShareCode,
+  enterShareCode,
 }
 
-export function Code(): JSX.Element {
-  const [state, setState] = createSignal(State.button);
-  const [getCode, setCode] = createSignal("");
+interface CodeAttributes {
+  state: Signal<State>;
+  shareCode: Signal<string | undefined>;
+}
+
+export function Code(props: CodeAttributes): JSX.Element {
+  const [state, setState] = props.state;
+  const [shareCode, setShareCode] = props.shareCode;
 
   // A reference to the input element.
   let inputElement!: HTMLInputElement;
@@ -74,22 +79,22 @@ export function Code(): JSX.Element {
   setTimeout(() => {
     inputElement.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.code === "Enter" && e.target instanceof HTMLInputElement) {
-        setCode(e.target.value);
-        console.log("Submit code:", getCode());
-        setState(State.button);
+        setShareCode(e.target.value);
+        console.log("Submit code:", shareCode());
+        setState(State.dropFiles);
       } else if (e.code === "Escape") {
-        setState(State.button);
+        setState(State.dropFiles);
       }
     });
   });
 
   // Update whenever STATE changes. DO NOT USE ANIMATE DIRECTLY.
   createEffect(() => {
-    if (state() === State.button) {
+    if (state() === State.dropFiles) {
       showButton.animate();
-    } else if (state() === State.code) {
+    } else if (state() === State.showShareCode) {
       showCode.animate();
-    } else if (state() === State.input) {
+    } else if (state() === State.enterShareCode) {
       showInput.animate();
     } else {
       console.warn("Unhandled state", state());
@@ -107,8 +112,8 @@ export function Code(): JSX.Element {
             type="text"
             placeholder="Enter Code"
             class="text-sm text-slate-700 placeholder:text-sm caret-slate-700 px-2 invisible opacity-0 focus:outline-none"
-            onblur={() => setState(State.button)}
-            onchange={(e) => setCode(e.target.value)}
+            onblur={() => setState(State.dropFiles)}
+            onchange={(e) => setShareCode(e.target.value)}
           />
         </div>
 
@@ -117,7 +122,7 @@ export function Code(): JSX.Element {
           id={button.id}
           class="text-white py-1 bg-slate-700 text-sm hover:bg-slate-800 cursor-pointer truncate text-clip"
           onclick={() => {
-            setState(State.input);
+            setState(State.enterShareCode);
           }}
         >
           <span id={buttonContent.id} class="px-2">
@@ -147,7 +152,7 @@ export function Code(): JSX.Element {
 
         <div id={code.id} class="text-sm w-0 truncate text-clip">
           <span id={codeContent.id} class="px-2 invisible opacity-0">
-            {getCode()}
+            {shareCode() ?? "No code found here..."}
           </span>
         </div>
       </div>
