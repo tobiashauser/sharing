@@ -10,19 +10,20 @@ import {
   FaSolidFolder,
 } from "solid-icons/fa";
 import { Accessor } from "solid-js";
-import { Item } from "~/components/drop-zone";
+import { Item, UploadStatus } from "~/components/drop-zone";
 
 interface IconAttributes {
   item: Item;
-  uploaded: Accessor<boolean>;
+  status: Accessor<UploadStatus>;
 }
 
-export default function Icon({ item, uploaded }: IconAttributes) {
+export default function Icon({ item, status }: IconAttributes) {
   const classList = () => {
     return {
       "size-5": true,
-      "text-muted-foreground": uploaded(),
-      "text-neutral-300": !uploaded(),
+      "text-muted-foreground": false,
+      "text-neutral-300": status() === UploadStatus.ongoing,
+      "text-red-300": status() === UploadStatus.failed,
       "transition ease-in-out": true,
     };
   };
