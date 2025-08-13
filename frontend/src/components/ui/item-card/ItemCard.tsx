@@ -1,6 +1,6 @@
 import gsap from "gsap";
-import { FaSolidXmark } from "solid-icons/fa";
-import { createEffect, createSignal, onMount } from "solid-js";
+import { FaSolidArrowRotateRight, FaSolidXmark } from "solid-icons/fa";
+import { createEffect, createSignal, onMount, Show } from "solid-js";
 import { Item, UploadRequest, UploadStatus } from "~/components/drop-zone";
 import { ID } from "~/components/sliding-doors";
 import Icon from "./Icon";
@@ -30,10 +30,6 @@ export function ItemCard(props: ItemCardAttributes) {
   // once when the component is first rendered.
   onMount(() => {
     request.send();
-  });
-
-  createEffect(() => {
-    console.log("request", status());
   });
 
   // Increase the the background fill in relation to `progress'.
@@ -78,7 +74,7 @@ export function ItemCard(props: ItemCardAttributes) {
             <p
               classList={{
                 "font-medium truncate text-[13px]": true,
-                "text-slate-800": true,
+                "text-slate-800": status() === UploadStatus.succeeded,
                 "text-neutral-300": status() === UploadStatus.ongoing,
                 "transition ease-in": true,
               }}
@@ -98,17 +94,35 @@ export function ItemCard(props: ItemCardAttributes) {
           </div>
         </div>
 
-        <button
-          onclick={() => console.log("remove item")}
-          classList={{
-            "text-muted-foreground/80 rounded-full": true,
-            "text-red-300 bg-red-100": hovering(),
-            "hover:bg-red-200 hover:text-red-400": true,
-            "transition ease-in": true,
-          }}
-        >
-          <FaSolidXmark class="size-3 m-1" />
-        </button>
+        <div class="gap-1 flex">
+          <Show when={status() === UploadStatus.failed}>
+            <button
+              onclick={() => request.send()}
+              classList={{
+                "text-blue-200 rounded-full": true,
+                "text-blue-300 bg-blue-100":
+                  hovering() || status() === UploadStatus.failed,
+                "hover:bg-blue-200 hover:text-blue-400": true,
+                "transition ease-in": true,
+              }}
+            >
+              <FaSolidArrowRotateRight class="size-3 m-1" />
+            </button>
+          </Show>
+
+          <button
+            onclick={() => console.log("remove item")}
+            classList={{
+              "text-muted-foreground/80 rounded-full": true,
+              "text-red-300 bg-red-100":
+                hovering() || status() === UploadStatus.failed,
+              "hover:bg-red-200 hover:text-red-400": true,
+              "transition ease-in": true,
+            }}
+          >
+            <FaSolidXmark class="size-3 m-1" />
+          </button>
+        </div>
       </div>
 
       {/* This div is going to indicate the progress by slowly filling the background. */}

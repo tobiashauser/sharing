@@ -21,9 +21,9 @@ export default function Icon({ item, status }: IconAttributes) {
   const classList = () => {
     return {
       "size-5": true,
-      "text-muted-foreground": false,
+      "text-slate-800": true,
       "text-neutral-300": status() === UploadStatus.ongoing,
-      "text-red-300": status() === UploadStatus.failed,
+      // "text-red-300": status() === UploadStatus.failed,
       "transition ease-in-out": true,
     };
   };

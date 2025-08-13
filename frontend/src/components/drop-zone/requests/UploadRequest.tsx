@@ -25,6 +25,12 @@ function createUrl(
   return url;
 }
 
+function formData(payload: File): FormData {
+  const formData = new FormData();
+  formData.append("file", payload);
+  return formData;
+}
+
 /// UploadRequest
 
 export class UploadRequest {
@@ -32,6 +38,8 @@ export class UploadRequest {
   private readonly _server: string;
   private readonly _session: string;
   private readonly _requests = new Set<XMLHttpRequest>();
+  private readonly _data = new Map<XMLHttpRequest, FormData>();
+
   private readonly _status = createSignal(UploadStatus.unsent);
 
   private readonly _getStatus: Accessor<UploadStatus>;
@@ -45,10 +53,6 @@ export class UploadRequest {
     this._session = session;
     this._getStatus = getStatus;
     this._setStatus = setStatus;
-
-    allFiles(this._item)
-      .map(this.createFileRequest)
-      .forEach((req) => this._requests.add(req));
   }
 
   /// Internal API
@@ -59,10 +63,21 @@ export class UploadRequest {
 
     // Configure the event handlers.
     request.onloadend = () => {
+      if (request.status === 200) {
+        this._setStatus(UploadStatus.succeeded);
+        return;
+      }
+
       if (request.status !== 0) {
         this._setStatus(UploadStatus.failed);
+        return;
       }
     };
+
+    if (!this._data.has(request)) {
+      console.log("Creating FormData");
+      this._data.set(request, formData(file));
+    }
 
     // Open an configure the request.
     request.open("POST", url, true);
@@ -77,9 +92,17 @@ export class UploadRequest {
 
   // Send the request to the server.
   send() {
+    allFiles(this._item)
+      .map(this.createFileRequest)
+      .forEach((req) => {
+        this._requests.add(req);
+        if (this._data.has(req)) {
+          req.send(this._data.get(req));
+        }
+      });
+
     console.log("Sending", this._item.name);
-    this._status[1](UploadStatus.ongoing);
-    this._requests.forEach((req) => req.send());
+    this._setStatus(UploadStatus.ongoing);
   }
 
   // Abort the request.
