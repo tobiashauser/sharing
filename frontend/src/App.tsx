@@ -1,7 +1,7 @@
 import { Code, State } from "#ui/code";
 import Droparea from "#ui/DropArea";
 import Info from "#ui/Info";
-import { ItemCard } from "#ui/item-card";
+import { ItemCard, ItemCardView } from "#ui/item-card";
 import { createSignal, For, type Component } from "solid-js";
 import { dropzone } from "~/components/drop-zone";
 import "./App.css";
@@ -31,6 +31,8 @@ const App: Component = () => {
   setTimeout(() => {
     bindInputElement(inputRef);
   });
+
+  return <ItemCardView />;
 
   return (
     <div class="m-2">
