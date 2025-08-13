@@ -21,6 +21,7 @@ const App: Component = () => {
 
   const appState = createSignal(State.dropFiles);
   const shareCode = createSignal<string | undefined>(undefined);
+  const [sessionToken, _] = createSignal<string>(crypto.randomUUID());
 
   // const [currentAppState, setAppState] = appState;
   // const [getShareCode, setShareCode] = shareCode;
@@ -64,7 +65,13 @@ const App: Component = () => {
         {/* Set the width of each cell with `auto-cols'. */}
         <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <For each={getItems()}>
-            {(item) => <ItemCard item={item} remove={removeItem(item)} />}
+            {(item) => (
+              <ItemCard
+                item={item}
+                remove={removeItem(item)}
+                session={sessionToken()}
+              />
+            )}
           </For>
         </div>
       </div>

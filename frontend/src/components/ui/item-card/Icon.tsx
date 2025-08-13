@@ -9,19 +9,21 @@ import {
   FaSolidFileZipper,
   FaSolidFolder,
 } from "solid-icons/fa";
+import { Accessor } from "solid-js";
 import { Item } from "~/components/drop-zone";
 
 interface IconAttributes {
   item: Item;
-  uploaded: boolean;
+  uploaded: Accessor<boolean>;
 }
 
 export default function Icon({ item, uploaded }: IconAttributes) {
   const classList = () => {
     return {
       "size-5": true,
-      "text-green-800": uploaded,
-      "text-muted-foreground": !uploaded,
+      "text-muted-foreground": uploaded(),
+      "text-neutral-300": !uploaded(),
+      "transition ease-in-out": true,
     };
   };
 

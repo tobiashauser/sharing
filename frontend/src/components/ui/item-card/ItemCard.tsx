@@ -4,6 +4,7 @@ import { createEffect, createSignal, onMount } from "solid-js";
 import { Item } from "~/components/drop-zone";
 import { ID } from "~/components/sliding-doors";
 import Icon from "./Icon";
+import { removeItem, uploadItem } from "./upload";
 import { info } from "./utils";
 
 /// Itemcard
@@ -14,33 +15,43 @@ import { info } from "./utils";
 interface ItemCardAttributes {
   item: Item;
   remove: EventListener;
+  session: string;
 }
 
 export function ItemCard(props: ItemCardAttributes) {
-  const { item, remove } = props;
+  const { item, remove, session } = props;
   const [hovering, setHovering] = createSignal(false);
   const [uploaded, setUploaded] = createSignal(false);
   const [progress, setProgress] = createSignal(0);
+  const [request, storeRequest] = createSignal<XMLHttpRequest | undefined>(
+    undefined,
+  );
+
+  const server = "http://localhost:3000";
 
   // (Ab)use `onMount' to initiate the upload. This hook is only called
   // once when the component is first rendered.
   onMount(() => {
-    // uploadItem(item, "/upload");
-    Array.from({ length: 100 }).forEach((_, idx) => {
-      setTimeout(() => setProgress((prev) => prev + 1), idx * 40);
-    });
+    uploadItem(item, server, "/upload", setProgress, setUploaded, session);
+    // Array.from({ length: 100 }).forEach((_, idx) => {
+    //   setTimeout(() => setProgress((prev) => prev + 1), idx * 20);
+    // });
   });
 
-  // Manage the progress indications.
-  // let bg!: HTMLDivElement;
-  // createEffect(() => {
-  //   if (bg) {
-  //     bg.style.width = progress() + "%";
-  //   }
-  // });
+  // Increase the the background fill in relation to `progress'.
   let progressBar = new ID();
   createEffect(() => {
     gsap.to(progressBar.selector, { width: `${progress()}%` });
+  });
+  // And remove it once it is uploaded.
+  createEffect(() => {
+    if (uploaded()) {
+      gsap.to(progressBar.selector, {
+        autoAlpha: 0,
+        ease: "power2.in",
+        delay: 0.3,
+      });
+    }
   });
 
   return (
@@ -53,39 +64,54 @@ export function ItemCard(props: ItemCardAttributes) {
       <div class="gap-3 flex items-center justify-between">
         <div class="gap-3 flex items-center overflow-hidden">
           <div class="size-10 rounded flex aspect-square items-center justify-center border">
-            <Icon item={item} uploaded={progress() === 100} />
+            <Icon item={item} uploaded={uploaded} />
           </div>
 
           <div class="min-w-0 gap-0.5 flex flex-col">
             <p
               classList={{
                 "font-medium truncate text-[13px]": true,
-                "text-slate-800": progress() === 100,
-                "text-muted-foreground": progress() < 100,
+                "text-slate-800": uploaded(),
+                "text-neutral-300": !uploaded(),
+                "transition ease-in": true,
               }}
             >
               {item.name}
             </p>
-            <p class="text-muted-foreground text-xs">{info(item)}</p>
+            <p
+              classList={{
+                "text-xs": true,
+                "text-muted-foreground": uploaded(),
+                "text-neutral-200": !uploaded(),
+                "transition ease-in": true,
+              }}
+            >
+              {info(item)}
+            </p>
           </div>
         </div>
 
         <button
-          onclick={remove}
+          onclick={() => {
+            if (uploaded()) {
+              removeItem(item, server, "/clean", session, remove);
+            } else {
+              // Cancel and clean up an ongoing upload.
+            }
+          }}
           classList={{
             "text-muted-foreground/80 rounded-full": true,
             "text-red-300 bg-red-100": hovering(),
             "hover:bg-red-200 hover:text-red-400": true,
-            "transition ease-in-out": true,
+            "trasition ease-in": true,
           }}
         >
           <FaSolidXmark class="size-3 m-1" />
         </button>
       </div>
 
-      {/* This div is going to be the progress bar. Its width will be animated. */}
+      {/* This div is going to indicate the progress by slowly filling the background. */}
       <div
-        // ref={bg}
         id={progressBar.id}
         class="left-0 top-0 bottom-0 w-0 bg-blue-100/25 absolute -z-1"
       />
