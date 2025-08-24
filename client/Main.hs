@@ -48,10 +48,13 @@ dragLeaveSub = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
 -- | Reducer
 updateModel :: Action -> Transition Model Action
 updateModel DragEnter = do
+  io_ $ consoleLog "dragenter"
   dragging .= True
   io $ (<$>) LastDrag now
 updateModel DragLeave = delay 2000 $ HasDragLeft
 updateModel (LastDrag time) = lastDrag .= time
+updateModel HasDragLeft = do
+  io_ $ consoleLog "drag left (delayed by 2 seconds)"
 
 -- | View
 viewModel :: Model -> View Model Action
