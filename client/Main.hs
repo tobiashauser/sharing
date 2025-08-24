@@ -2,9 +2,10 @@
 
 module Main where
 
-import Language.Javascript.JSaddle (jsg, (#))
-import Control.Monad (void)
+import Language.Javascript.JSaddle 
+import Control.Monad 
 import Miso
+import Miso.Lens
 
 delay :: Int -> action -> Transition model action
 delay ms action = withSink $ \sink -> do
@@ -13,25 +14,53 @@ delay ms action = withSink $ \sink -> do
   void $ win # ("setTimeout" :: MisoString) $ (cb, ms)
 
 -- | Model
-type Model = ()
+data Model = Model { _dragging :: Bool
+                   , _lastDrag :: Double
+                   } deriving (Eq, Show)
+
+initialModel :: Model
+initialModel = Model { _dragging = False
+                     , _lastDrag = 0
+                     }
+
+-- | Lenses
+
+dragging :: Lens Model Bool
+dragging = lens _dragging $ \record field -> record { _dragging = field }
+
+lastDrag :: Lens Model Double
+lastDrag = lens _lastDrag $ \record field -> record { _lastDrag = field }
 
 -- | Action
-data Action = Hello { name :: String } 
-            | DelayedHello { name :: String }
-            
+data Action = DragEnter
+            | DragLeave
+            | HasDragLeft
+            | LastDrag Double
+
+-- | Subscriptions
+
+dragEnterSub :: Sub Action
+dragEnterSub = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
+
+dragLeaveSub :: Sub Action
+dragLeaveSub = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
+
 -- | Reducer
 updateModel :: Action -> Transition Model Action
-updateModel (Hello name) = io_ $ consoleLog $ "Hello, " <> (ms name) <> "!"
-updateModel (DelayedHello name) = delay 3000 $ Hello name
+updateModel DragEnter = do
+  dragging .= True
+  io $ (<$>) LastDrag now
+updateModel DragLeave = delay 2000 $ HasDragLeft
+updateModel (LastDrag time) = lastDrag .= time
 
 -- | View
 viewModel :: Model -> View Model Action
-viewModel () = p_ [] [ text "Hello, client!" ]
+viewModel state = p_ [] [ text $ "LastDrag: " <> ms (_lastDrag state) ]
 
 -- | Main
 app :: App Model Action
-app = (component () updateModel viewModel) {
-  initialAction = Just $ DelayedHello "Mr. Blob"
+app = (component initialModel updateModel viewModel) {
+  subs = [ dragEnterSub, dragLeaveSub ]
   }
 
 main :: IO () 
