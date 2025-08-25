@@ -13,57 +13,88 @@ delay ms action = withSink $ \sink -> do
   cb  <- asyncCallback $ sink action
   void $ win # ("setTimeout" :: MisoString) $ (cb, ms)
 
+inCase :: Ord a => a -> (a -> a -> Bool) -> a -> result -> Maybe result
+inCase lhs compare rhs success
+  | compare lhs rhs = Just success
+  | otherwise = Nothing
+
 -- | Model
 data Model = Model { _dragging :: Bool
-                   , _lastDrag :: Double
+                   , _dragEnteredAt :: Double
+                   , _dragLeftAt :: Double
                    } deriving (Eq, Show)
 
 initialModel :: Model
 initialModel = Model { _dragging = False
-                     , _lastDrag = 0
+                     , _dragEnteredAt = 0
+                     , _dragLeftAt = 0
                      }
 
 -- | Lenses
-
 dragging :: Lens Model Bool
 dragging = lens _dragging $ \record field -> record { _dragging = field }
 
-lastDrag :: Lens Model Double
-lastDrag = lens _lastDrag $ \record field -> record { _lastDrag = field }
+dragEnteredAt :: Lens Model Double
+dragEnteredAt = lens _dragEnteredAt $ \record field -> record { _dragEnteredAt = field }
+
+dragLeftAt :: Lens Model Double
+dragLeftAt = lens _dragLeftAt $ \record field -> record { _dragLeftAt = field }
 
 -- | Action
 data Action = DragEnter
-            | DragLeave
-            | HasDragLeft
-            | LastDrag Double
+            | DragLeave Bool -- if False delay 
+            | DelayDragLeave
+            | SetDragging Bool
+            | SetDragEnteredAt Double
+            | SetDragLeftAt Double
 
 -- | Subscriptions
 
-dragEnterSub :: Sub Action
-dragEnterSub = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
+dragEnter :: Sub Action
+dragEnter = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
 
-dragLeaveSub :: Sub Action
-dragLeaveSub = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
+dragLeave :: Sub Action
+dragLeave = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
 
 -- | Reducer
 updateModel :: Action -> Transition Model Action
+
 updateModel DragEnter = do
-  io_ $ consoleLog "dragenter"
-  dragging .= True
-  io $ (<$>) LastDrag now
-updateModel DragLeave = delay 2000 $ HasDragLeft
-updateModel (LastDrag time) = lastDrag .= time
-updateModel HasDragLeft = do
-  io_ $ consoleLog "drag left (delayed by 2 seconds)"
+  io_ $ consoleLog "DragEnter"
+  batch [
+    pure $ SetDragging True
+    , SetDragEnteredAt <$> now
+    ]
+
+updateModel (DragLeave False) = do
+  delay 2000 $ DragLeave True
+  io $ SetDragLeftAt <$> now
+
+updateModel (DragLeave True) = do
+  dragEnteredAt <- gets _dragEnteredAt
+  dragLeftAt <- gets _dragLeftAt
+  for blob 
+  -- for $ inCase dragEnteredAt (<) dragLeftAt $ SetDragging <*> pure False
+  -- for $ inCase lastDrag (<) <$> now <*> (pure $ SetDragging False)
+
+updateModel (SetDragging bool) = dragging .= bool
+updateModel (SetDragEnteredAt time) = dragEnteredAt .= time
+updateModel (SetDragLeftAt time) = dragLeftAt .= time
+
+blob = inCase 1 (<) 2 DragLeave <*> pure False
 
 -- | View
 viewModel :: Model -> View Model Action
-viewModel state = p_ [] [ text $ "LastDrag: " <> ms (_lastDrag state) ]
+viewModel state = p_ [] [
+  text $ ms (show $ _dragEnteredAt state)
+  , text $ ms (show $ _dragging state)
+  ]
 
 -- | Main
 app :: App Model Action
 app = (component initialModel updateModel viewModel) {
-  subs = [ dragEnterSub, dragLeaveSub ]
+  subs = [ dragEnter, dragLeave ]
+  , logLevel = DebugEvents
   }
 
 main :: IO () 
