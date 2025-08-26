@@ -1,54 +1,67 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 module Main where
 
-import Language.Javascript.JSaddle 
-import Control.Monad 
+import Control.Lens
+import Lib
 import Miso
-import Miso.Lens
 
-delay :: Int -> action -> Transition model action
-delay ms action = withSink $ \sink -> do
-  win <- jsg ("window" :: MisoString)
-  cb  <- asyncCallback $ sink action
-  void $ win # ("setTimeout" :: MisoString) $ (cb, ms)
+-------------------------------------------------------------------------------
+--- Model           
+-------------------------------------------------------------------------------
 
-inCase :: Ord a => a -> (a -> a -> Bool) -> a -> result -> Maybe result
-inCase lhs compare rhs success
-  | compare lhs rhs = Just success
-  | otherwise = Nothing
-
--- | Model
-data Model = Model { _dragging :: Bool
-                   , _dragEnteredAt :: Double
-                   , _dragLeftAt :: Double
+data Model = Model { _isDragging :: Bool
+                   , _dragTimes :: (Double, Double)  -- (dragenter, dragleave)
                    } deriving (Eq, Show)
 
+-- | Generate van Laarhoven lenses.
+$(makeLenses ''Model)
+
+-- | The initial state of the application.
 initialModel :: Model
-initialModel = Model { _dragging = False
-                     , _dragEnteredAt = 0
-                     , _dragLeftAt = 0
+initialModel = Model { _isDragging = False
+                     , _dragTimes = (0, 0)
                      }
 
--- | Lenses
-dragging :: Lens Model Bool
-dragging = lens _dragging $ \record field -> record { _dragging = field }
+-------------------------------------------------------------------------------
+--- Actions         
+-------------------------------------------------------------------------------
 
-dragEnteredAt :: Lens Model Double
-dragEnteredAt = lens _dragEnteredAt $ \record field -> record { _dragEnteredAt = field }
+data Action = None
+            | DragEnter
+            | DragLeave
+            | DragLeft
+            | forall a. Set (a -> Model -> Model) a
 
-dragLeftAt :: Lens Model Double
-dragLeftAt = lens _dragLeftAt $ \record field -> record { _dragLeftAt = field }
+-------------------------------------------------------------------------------
+--- Reducer         
+-------------------------------------------------------------------------------
 
--- | Action
-data Action = DragEnter
-            | DragLeave Bool -- if False delay 
-            | DelayDragLeave
-            | SetDragging Bool
-            | SetDragEnteredAt Double
-            | SetDragLeftAt Double
+updateModel :: Action -> Transition Model Action
 
--- | Subscriptions
+updateModel DragEnter = do
+  isDragging .= True
+  io $ Set (dragTimes . _1 .~) <$> now
+
+updateModel DragLeave = do
+  delay 200 DragLeft
+  io $ Set (dragTimes . _2 .~) <$> now
+
+updateModel DragLeft = do
+  (lhs, rhs) <- use dragTimes
+  for $ pure $ inCase ((lhs + 50) < rhs) $ Set (isDragging .~) False
+  -- Think of the +50 as a delay to give the browser engine a chance to call the
+  -- nexte event.
+
+updateModel (Set set a) = modify $ set a
+
+updateModel _ = noop None 
+
+-------------------------------------------------------------------------------
+--- Subscriptions   
+-------------------------------------------------------------------------------
 
 dragEnter :: Sub Action
 dragEnter = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
@@ -56,45 +69,34 @@ dragEnter = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
 dragLeave :: Sub Action
 dragLeave = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
 
--- | Reducer
-updateModel :: Action -> Transition Model Action
+-- See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
+-- why we need the options.
+dragOver :: Sub Action
+dragOver = windowSubWithOptions Options { preventDefault = True, stopPropagation = True }
+  "dragover" emptyDecoder $ \_ -> None
 
-updateModel DragEnter = do
-  io_ $ consoleLog "DragEnter"
-  batch [
-    pure $ SetDragging True
-    , SetDragEnteredAt <$> now
-    ]
+-- CONTINUE HERE
+-- drop :: Sub Action
+-- drop = windowSub "drop" 
+  
+-------------------------------------------------------------------------------
+--- View            
+-------------------------------------------------------------------------------
 
-updateModel (DragLeave False) = do
-  delay 2000 $ DragLeave True
-  io $ SetDragLeftAt <$> now
-
-updateModel (DragLeave True) = do
-  dragEnteredAt <- gets _dragEnteredAt
-  dragLeftAt <- gets _dragLeftAt
-  for blob 
-  -- for $ inCase dragEnteredAt (<) dragLeftAt $ SetDragging <*> pure False
-  -- for $ inCase lastDrag (<) <$> now <*> (pure $ SetDragging False)
-
-updateModel (SetDragging bool) = dragging .= bool
-updateModel (SetDragEnteredAt time) = dragEnteredAt .= time
-updateModel (SetDragLeftAt time) = dragLeftAt .= time
-
-blob = inCase 1 (<) 2 DragLeave <*> pure False
-
--- | View
 viewModel :: Model -> View Model Action
-viewModel state = p_ [] [
-  text $ ms (show $ _dragEnteredAt state)
-  , text $ ms (show $ _dragging state)
+viewModel state = div_ []
+  [ p_ [] [ text $ "Dragging: " <> (ms (show (state ^. isDragging))) ]
   ]
 
--- | Main
+-------------------------------------------------------------------------------
+--- App             
+-------------------------------------------------------------------------------
+
 app :: App Model Action
 app = (component initialModel updateModel viewModel) {
-  subs = [ dragEnter, dragLeave ]
-  , logLevel = DebugEvents
+  subs = [ dragEnter
+         , dragLeave
+         , dragOver ]
   }
 
 main :: IO () 

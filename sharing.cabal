@@ -5,6 +5,7 @@ build-type:    Simple
 
 executable client
   main-is:          Main.hs
-  build-depends:    base, jsaddle, miso
+  build-depends:    base, jsaddle, miso, lens
+  other-modules:    Lib
   hs-source-dirs:   client
   default-language: Haskell2010

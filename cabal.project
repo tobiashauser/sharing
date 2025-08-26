@@ -4,6 +4,8 @@ packages:
 allow-newer:
   all:base
 
+flags: +template-haskell
+
 -- This fixes a weird compilation error. See
 -- https://discourse.haskell.org/t/solved-build-trouble-zlib-h-0-7-1-0/9438/9
 constraints:
