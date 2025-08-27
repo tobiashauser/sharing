@@ -7,6 +7,11 @@ module Main where
 import Control.Lens
 import Lib
 import Miso
+import Miso.String
+import Miso.Event.Types
+import Language.Javascript.JSaddle.Value
+import Language.Javascript.JSaddle.Types
+import Language.Javascript.JSaddle.Object
 
 -------------------------------------------------------------------------------
 --- Model           
@@ -33,6 +38,8 @@ data Action = None
             | DragEnter
             | DragLeave
             | DragLeft
+            | Drop (Maybe JSVal)
+            | forall a. Loggable a => Log a
             | forall a. Set (a -> Model -> Model) a
 
 -------------------------------------------------------------------------------
@@ -46,16 +53,21 @@ updateModel DragEnter = do
   io $ Set (dragTimes . _1 .~) <$> now
 
 updateModel DragLeave = do
-  delay 200 DragLeft
+  Lib.delay 200 DragLeft
   io $ Set (dragTimes . _2 .~) <$> now
 
 updateModel DragLeft = do
   (lhs, rhs) <- use dragTimes
   for $ pure $ inCase ((lhs + 50) < rhs) $ Set (isDragging .~) False
   -- Think of the +50 as a delay to give the browser engine a chance to call the
-  -- nexte event.
+  -- next event.
+  
+updateModel (Drop (Just a)) = io_ $ consoleLog' a
+updateModel (Drop Nothing)  = io_ $ consoleLog "nothing dropped"
 
 updateModel (Set set a) = modify $ set a
+
+updateModel (Log a) = io_ $ _log a 
 
 updateModel _ = noop None 
 
@@ -63,21 +75,35 @@ updateModel _ = noop None
 --- Subscriptions   
 -------------------------------------------------------------------------------
 
+dragOptions :: Options
+dragOptions = Options { preventDefault = True
+                     , stopPropagation = True }
+
 dragEnter :: Sub Action
-dragEnter = windowSub "dragenter" emptyDecoder $ \_ -> DragEnter
+dragEnter = windowSubWithOptions dragOptions "dragenter" emptyDecoder $ \_ -> DragEnter
 
 dragLeave :: Sub Action
-dragLeave = windowSub "dragleave" emptyDecoder $ \_ -> DragLeave
+dragLeave = windowSubWithOptions dragOptions "dragleave" emptyDecoder $ \_ -> DragLeave
 
 -- See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
 -- why we need the options.
 dragOver :: Sub Action
-dragOver = windowSubWithOptions Options { preventDefault = True, stopPropagation = True }
-  "dragover" emptyDecoder $ \_ -> None
-
--- CONTINUE HERE
--- drop :: Sub Action
-drop = windowSub "drop" 
+-- dragOver = windowSubWithOptions subOptions "dragover" emptyDecoder $ \_ -> Log $ ms "dragover"
+dragOver = windowSubscribe "dragover"
+  (\e -> do
+      e ^. js0 "preventDefault"
+      e ^. js0 "stopPropagation"
+      return e)
+  (\e -> None)
+  
+drop :: Sub Action
+-- drop = windowSubscribeWithOptions subOptions "drop" return $ \e -> Drop (Just e)
+drop = windowSubscribe "drop"
+  (\e -> do
+     e ^. js0 "preventDefault"
+     e ^. js0 "stopPropagation"
+     return e)
+  (\e -> Drop $ Just e)
   
 -------------------------------------------------------------------------------
 --- View            
@@ -96,7 +122,8 @@ app :: App Model Action
 app = (component initialModel updateModel viewModel) {
   subs = [ dragEnter
          , dragLeave
-         , dragOver ]
+         , dragOver
+         , Main.drop ]
   }
 
 main :: IO () 

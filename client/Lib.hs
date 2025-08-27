@@ -1,10 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE FlexibleInstances #-}
+-- {-# LANGUAGE UndecidableInstances #-}
 
 module Lib where
 
 import Control.Monad
-import Language.Javascript.JSaddle 
+import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Class
+import Language.Javascript.JSaddle hiding (isNull, isUndefined)
+import Language.Javascript.JSaddle.Value hiding (isNull, isUndefined)
+import Language.Javascript.JSaddle.Native.Internal (isNull, isUndefined)
 import Miso
 import Miso.FFI
 import Miso.String
@@ -41,6 +47,27 @@ eventStopPropagation e = do
   pure ()
 
 -------------------------------------------------------------------------------
+--- Extensions      
+-------------------------------------------------------------------------------
+
+-- instance ToMisoString a => ToMisoString (Maybe a) where
+--   toMisoString Nothing = "[null]"
+--   toMisoString (Just x) = toMisoString x
+
+class Loggable a where
+  _log :: a -> JSM ()
+
+instance Loggable JSVal where
+  _log val = consoleLog' val
+
+instance Loggable MisoString where
+  _log = consoleLog 
+
+instance Loggable a => Loggable (Maybe a) where
+  _log (Just val) = _log val
+  _log Nothing = _log $ ms "[null]"
+
+-------------------------------------------------------------------------------
 --- Actions         
 -------------------------------------------------------------------------------
 
@@ -72,8 +99,8 @@ inCase predicate result
 -- You are responsible to check for undefined return values (e.g. when working
 -- with @JSVal). This can be done by returning a @Maybe and checking for null or
 -- undefined with @isNull.
-subscribe :: MisoString -> (JSVal -> JSM result) -> (result -> action) -> Sub action
-subscribe = subscribeWithOptions defaultOptions
+windowSubscribe :: MisoString -> (JSVal -> JSM result) -> (result -> action) -> Sub action
+windowSubscribe = windowSubscribeWithOptions defaultOptions
 
 -- | A generic version of @windowSubWithOptions that doesn't require a pure
 -- @Decoder.
@@ -81,8 +108,8 @@ subscribe = subscribeWithOptions defaultOptions
 -- You are responsible to check for undefined return values (e.g. when working
 -- with @JSVal). This can be done by returning a @Maybe and checking for null or
 -- undefined with @isNull.
-subscribeWithOptions :: Options -> MisoString -> (JSVal -> JSM result) -> (result -> action) -> Sub action
-subscribeWithOptions Options{..} name handle action sink = createSub aquire release sink
+windowSubscribeWithOptions :: Options -> MisoString -> (JSVal -> JSM result) -> (result -> action) -> Sub action
+windowSubscribeWithOptions Options{..} name handle action sink = createSub aquire release sink
   where
     release = windowRemoveEventListener name
     aquire = windowAddEventListener name $ \event -> do
@@ -95,12 +122,18 @@ subscribeWithOptions Options{..} name handle action sink = createSub aquire rele
 --- Files and Folders
 -------------------------------------------------------------------------------
 
-handleDragEvent :: JSVal -> JSM Double
-handleDragEvent dragEvent = do
-  dataTransfer <- dragEvent ! "dataTransfer"
-  dataTransferItemList <- dataTransfer ! "items"
-  -- Return (change to actual value after transformation pipeline is done)
-  now
+handleDragEvent :: JSVal -> JSM (Maybe JSVal)
+handleDragEvent dragEvent = runMaybeT $ do
+  dataTransfer <- ensure $ dragEvent ! "dataTransfer"
+  dataTransferItemList <- ensure $ dataTransfer ! "items"
+  return dataTransferItemList
+  where
+    ensure :: JSM JSVal -> MaybeT JSM JSVal
+    ensure m = MaybeT $ do
+      v <- m
+      n <- isNull v
+      u <- isUndefined v
+      pure $ if n || u then Nothing else Just v
 
 data Item = File
           | Folder { items :: [ Item ] }
