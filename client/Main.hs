@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE CPP #-}
 
 module Main where
 
@@ -75,6 +76,8 @@ updateModel _ = noop None
 --- Subscriptions   
 -------------------------------------------------------------------------------
 
+-- See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
+-- why we need these options.
 dragOptions :: Options
 dragOptions = Options { preventDefault = True
                      , stopPropagation = True }
@@ -85,25 +88,14 @@ dragEnter = windowSubWithOptions dragOptions "dragenter" emptyDecoder $ \_ -> Dr
 dragLeave :: Sub Action
 dragLeave = windowSubWithOptions dragOptions "dragleave" emptyDecoder $ \_ -> DragLeave
 
--- See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/drop_event
--- why we need the options.
 dragOver :: Sub Action
--- dragOver = windowSubWithOptions subOptions "dragover" emptyDecoder $ \_ -> Log $ ms "dragover"
-dragOver = windowSubscribe "dragover"
-  (\e -> do
-      e ^. js0 "preventDefault"
-      e ^. js0 "stopPropagation"
-      return e)
-  (\e -> None)
-  
+dragOver = windowSubWithOptions dragOptions "dragover" emptyDecoder $ \_ -> None
+
+-- There is a bug in the way the options are applied when running the website
+-- with JSaddle: The drop event is not fired because the default action is not
+-- prevented. Use the WASM compile target instead.
 drop :: Sub Action
--- drop = windowSubscribeWithOptions subOptions "drop" return $ \e -> Drop (Just e)
-drop = windowSubscribe "drop"
-  (\e -> do
-     e ^. js0 "preventDefault"
-     e ^. js0 "stopPropagation"
-     return e)
-  (\e -> Drop $ Just e)
+drop = windowSubscribeWithOptions dragOptions "drop" handleDragEvent Drop
   
 -------------------------------------------------------------------------------
 --- View            
@@ -118,6 +110,10 @@ viewModel state = div_ []
 --- App             
 -------------------------------------------------------------------------------
 
+#ifdef WASM
+foreign export javascript "hs_start" main :: IO ()
+#endif
+
 app :: App Model Action
 app = (component initialModel updateModel viewModel) {
   subs = [ dragEnter
@@ -128,3 +124,4 @@ app = (component initialModel updateModel viewModel) {
 
 main :: IO () 
 main = run $ startApp app
+

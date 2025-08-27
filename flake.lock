@@ -744,6 +744,10 @@
     },
     "root": {
       "inputs": {
+        "ghc-wasm-meta": [
+          "miso",
+          "ghc-wasm-meta"
+        ],
         "miso": "miso",
         "nixpkgs": [
           "miso",
