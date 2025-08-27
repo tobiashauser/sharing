@@ -77,7 +77,7 @@ dragOver = windowSubWithOptions Options { preventDefault = True, stopPropagation
 
 -- CONTINUE HERE
 -- drop :: Sub Action
--- drop = windowSub "drop" 
+drop = windowSub "drop" 
   
 -------------------------------------------------------------------------------
 --- View            
