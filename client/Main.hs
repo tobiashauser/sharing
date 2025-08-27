@@ -64,7 +64,9 @@ updateModel DragLeft = do
   -- next event.
   
 updateModel (Drop (Just a)) = io_ $ consoleLog' a
-updateModel (Drop Nothing)  = io_ $ consoleLog "nothing dropped"
+
+updateModel (Drop Nothing)  =
+  io_ $ consoleError "An error occured in `handleDragEvent': got nothing."
 
 updateModel (Set set a) = modify $ set a
 

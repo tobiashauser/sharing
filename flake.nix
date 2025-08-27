@@ -107,7 +107,7 @@
             exit 1
           fi
 
-          http-server "$out" -c-1
+          http-server "$out" -c-1 --port=8008
         '';
       };
 
