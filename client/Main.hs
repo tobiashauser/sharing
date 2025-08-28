@@ -52,7 +52,7 @@ updateModel DragEnter = do
   io $ Set (dragTimes . _1 .~) <$> now
 
 updateModel DragLeave = do
-  Lib.delay 200 DragLeft
+  delay 100 DragLeft -- increase the delay if needed for slower devices
   io $ Set (dragTimes . _2 .~) <$> now
 
 updateModel DragLeft = do
@@ -63,9 +63,9 @@ updateModel DragLeft = do
   
 updateModel (Drop (Just items)) = withSink $ \sink -> do
   forM_ items $ \item -> do
-    file <- getFile item 
-    sink (Log file)
+    sink (Log item)
 
+-- Can this ever be reached?
 updateModel (Drop Nothing)  =
   io_ $ consoleError "An error occured in `handleDragEvent': got nothing."
 
@@ -98,7 +98,7 @@ dragOver = windowSubWithOptions dragOptions "dragover" emptyDecoder $ \_ -> None
 -- with JSaddle: The drop event is not fired because the default action is not
 -- prevented. Use the WASM compile target instead.
 drop :: Sub Action
-drop = windowSubscribeWithOptions dragOptions "drop" handleDragEvent Drop
+drop = windowSubscribeWithOptions dragOptions "drop" handleDragEvent Log -- Drop
   
 -------------------------------------------------------------------------------
 --- View            

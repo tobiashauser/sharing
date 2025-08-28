@@ -127,24 +127,35 @@ windowSubscribeWithOptions Options{..} name handle action sink = createSub aquir
   where
     release = windowRemoveEventListener name
     aquire = windowAddEventListener name $ \event -> do
-      result <- handle event
-      when preventDefault $ eventPreventDefault event
-      when stopPropagation $ eventStopPropagation event
+      when preventDefault $ eventPreventDefault event   -- apply the options 
+      when stopPropagation $ eventStopPropagation event -- before running the 
+      result <- handle event                            -- handle function
       sink (action result)
 
 -------------------------------------------------------------------------------
 --- Files and Folders
 -------------------------------------------------------------------------------
 
+--- Item
+
 data Item = File   { name :: MisoString
+                   , file :: Maybe JSVal
                    , fileSystemFileEntry :: JSVal }
-          | Folder JSVal
+          | Folder { name :: MisoString
+                   , contents :: [Item]
+                   , fileSystemDirectoryEntry :: JSVal }
 
 instance Loggable Item where
-  _log (File name fileSystemFileEntry) = do
+  _log (File name file fileSystemFileEntry) = do
     _log $ "File { name = " <> name <> " }"
+    _log file
     _log fileSystemFileEntry
-  _log (Folder val) = _log val
+  _log (Folder name contents fileSystemDirectoryEntry) = do
+    _log $ "Folder { name = " <> name <> " }"
+    _log contents
+    _log fileSystemDirectoryEntry
+
+--- Handlers
 
 handleDragEvent :: JSVal -> JSM (Maybe [Item])
 handleDragEvent dragEvent = runMaybeT $ do
@@ -169,22 +180,35 @@ handleDragEvent dragEvent = runMaybeT $ do
     toItem v = do
       isDirectory <- v ! "isDirectory" >>= valToBool
       case isDirectory of
+        -- File
         False -> do
           name <- v ! "name" >>= valToMs
+          file <- getFile v
           return $ File { name = name
+                        , file = file
                         , fileSystemFileEntry = v }
+        -- Folder
+        True -> do
+          name <- v ! "name" >>= valToMs
+          return $ Folder { name = name
+                          , contents = []
+                          , fileSystemDirectoryEntry = v }
 
-        True  -> return $ Folder v
+    -- | Input: FileSystemFileEntry
+    getFile :: JSVal -> JSM (Maybe JSVal)
+    getFile e = do
+      result <- liftIO newEmptyMVar
+      e # "file" $ (success result, error result)
+      liftIO $ takeMVar result
+        where
+          success result = syncCallback1 $ \file -> do
+            liftIO $ void $ tryPutMVar result $ Just file
+          error result = syncCallback1 $ \_ -> do
+            liftIO $ void $ tryPutMVar result Nothing
 
-getFile :: Item -> JSM (Maybe JSVal)
-getFile (File _ entry) = do
-  result <- liftIO newEmptyMVar
-  entry # "file" $ (success result, error result)
-  liftIO $ takeMVar result
-    where
-      success result = syncCallback1 $ \file -> do
-        liftIO $ void $ tryPutMVar result $ Just file
-      error result = syncCallback1 $ \_ -> do
-        liftIO $ void $ tryPutMVar result Nothing
-getFile (Folder _) = do
-  return Nothing
+    -- | Input: FileSystemDirectoryEntry
+    -- getContents :: JSVal -> JSM [Item]
+    -- getContents e = do
+      
+    
+
