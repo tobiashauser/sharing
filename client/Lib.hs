@@ -5,12 +5,15 @@
 
 module Lib where
 
-import Control.Monad
-import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.Class
+import Control.Concurrent.MVar (MVar, newEmptyMVar, tryPutMVar, takeMVar)
+import Control.Monad (when, void)
+import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Class (MonadTrans(lift))
+import Control.Monad.Trans.Maybe (MaybeT(..))
+import JavaScript.Array (toListIO)
 import Language.Javascript.JSaddle hiding (isNull, isUndefined)
-import Language.Javascript.JSaddle.Value hiding (isNull, isUndefined)
 import Language.Javascript.JSaddle.Native.Internal (isNull, isUndefined)
+import Language.Javascript.JSaddle.Value hiding (isNull, isUndefined)
 import Miso
 import Miso.FFI
 import Miso.String
@@ -60,12 +63,23 @@ class Loggable a where
 instance Loggable JSVal where
   _log val = consoleLog' val
 
+instance Loggable [JSVal] where
+  _log vals = mapM_ _log vals
+
 instance Loggable MisoString where
-  _log = consoleLog 
+  _log = consoleLog
 
 instance Loggable a => Loggable (Maybe a) where
   _log (Just val) = _log val
   _log Nothing = _log $ ms "[null]"
+
+instance Loggable a => Loggable [a] where
+  _log as = mapM_ _log as
+
+valToMs :: ToJSVal value => value -> JSM MisoString
+valToMs value = do
+  text <- valToText value
+  return $ toMisoString text
 
 -------------------------------------------------------------------------------
 --- Actions         
@@ -122,11 +136,24 @@ windowSubscribeWithOptions Options{..} name handle action sink = createSub aquir
 --- Files and Folders
 -------------------------------------------------------------------------------
 
-handleDragEvent :: JSVal -> JSM (Maybe JSVal)
+data Item = File   { name :: MisoString
+                   , fileSystemFileEntry :: JSVal }
+          | Folder JSVal
+
+instance Loggable Item where
+  _log (File name fileSystemFileEntry) = do
+    _log $ "File { name = " <> name <> " }"
+    _log fileSystemFileEntry
+  _log (Folder val) = _log val
+
+handleDragEvent :: JSVal -> JSM (Maybe [Item])
 handleDragEvent dragEvent = runMaybeT $ do
-  dataTransfer <- ensure $ dragEvent ! "dataTransfer"
+  dataTransfer         <- ensure $ dragEvent ! "dataTransfer"
   dataTransferItemList <- ensure $ dataTransfer ! "items"
-  return dataTransferItemList
+  dataTransferItems    <- lift $ toListIO $ SomeJSArray dataTransferItemList
+  fileSystemEntries    <- lift $ mapM toFileSystemEntry dataTransferItems
+  items                <- lift $ mapM toItem fileSystemEntries
+  return items
   where
     ensure :: JSM JSVal -> MaybeT JSM JSVal
     ensure m = MaybeT $ do
@@ -135,10 +162,29 @@ handleDragEvent dragEvent = runMaybeT $ do
       u <- isUndefined v
       pure $ if n || u then Nothing else Just v
 
-data Item = File
-          | Folder { items :: [ Item ] }
+    toFileSystemEntry :: JSVal -> JSM JSVal
+    toFileSystemEntry v = v # "webkitGetAsEntry" $ ()
 
+    toItem :: JSVal -> JSM Item
+    toItem v = do
+      isDirectory <- v ! "isDirectory" >>= valToBool
+      case isDirectory of
+        False -> do
+          name <- v ! "name" >>= valToMs
+          return $ File { name = name
+                        , fileSystemFileEntry = v }
 
--- data DataTransfer =
+        True  -> return $ Folder v
 
--- dataTransferDecoder :: Decoder DataTransfer
+getFile :: Item -> JSM (Maybe JSVal)
+getFile (File _ entry) = do
+  result <- liftIO newEmptyMVar
+  entry # "file" $ (success result, error result)
+  liftIO $ takeMVar result
+    where
+      success result = syncCallback1 $ \file -> do
+        liftIO $ void $ tryPutMVar result $ Just file
+      error result = syncCallback1 $ \_ -> do
+        liftIO $ void $ tryPutMVar result Nothing
+getFile (Folder _) = do
+  return Nothing

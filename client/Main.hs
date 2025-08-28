@@ -8,11 +8,9 @@ module Main where
 import Control.Lens
 import Lib
 import Miso
-import Miso.String
-import Miso.Event.Types
-import Language.Javascript.JSaddle.Value
-import Language.Javascript.JSaddle.Types
-import Language.Javascript.JSaddle.Object
+-- import Miso.String
+-- import Miso.Event.Types
+import Control.Monad (forM_)
 
 -------------------------------------------------------------------------------
 --- Model           
@@ -39,7 +37,7 @@ data Action = None
             | DragEnter
             | DragLeave
             | DragLeft
-            | Drop (Maybe JSVal)
+            | Drop (Maybe [Item])
             | forall a. Loggable a => Log a
             | forall a. Set (a -> Model -> Model) a
 
@@ -63,7 +61,10 @@ updateModel DragLeft = do
   -- Think of the +50 as a delay to give the browser engine a chance to call the
   -- next event.
   
-updateModel (Drop (Just a)) = io_ $ consoleLog' a
+updateModel (Drop (Just items)) = withSink $ \sink -> do
+  forM_ items $ \item -> do
+    file <- getFile item 
+    sink (Log file)
 
 updateModel (Drop Nothing)  =
   io_ $ consoleError "An error occured in `handleDragEvent': got nothing."
@@ -72,7 +73,7 @@ updateModel (Set set a) = modify $ set a
 
 updateModel (Log a) = io_ $ _log a 
 
-updateModel _ = noop None 
+updateModel _ = noop None
 
 -------------------------------------------------------------------------------
 --- Subscriptions   

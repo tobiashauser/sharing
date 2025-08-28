@@ -17,7 +17,7 @@ common wasm
 executable client
   import:             wasm
   main-is:            Main.hs
-  build-depends:      base, jsaddle, miso, lens, transformers
+  build-depends:      base, jsaddle, miso, lens, transformers, text
   other-modules:      Lib
   hs-source-dirs:     client
   default-language:   GHC2021
