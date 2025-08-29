@@ -1,2 +1,1 @@
-((nil
-  . ())
+((nil . ((emx/project-compile-commands . (("d" . "dev"))))))
