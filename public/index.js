@@ -2144,6 +2144,14 @@
   };
   var nonCanceler = /* @__PURE__ */ $$const(/* @__PURE__ */ pure22(unit));
 
+  // output/Effect.Aff.Class/index.js
+  var monadAffAff = {
+    liftAff: /* @__PURE__ */ identity(categoryFn),
+    MonadEffect0: function() {
+      return monadEffectAff;
+    }
+  };
+
   // output/Web.DOM.ParentNode/foreign.js
   var getEffProp = function(name15) {
     return function(node) {
@@ -5194,7 +5202,7 @@
       return f(v);
     };
   };
-  var initDriverState = function(component2) {
+  var initDriverState = function(component) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -5210,8 +5218,8 @@
             var subscriptions = $$new(new Just(empty2))();
             var forks = $$new(empty2)();
             var ds = {
-              component: component2,
-              state: component2.initialState(input3),
+              component,
+              state: component.initialState(input3),
               refs: empty2,
               children: empty3,
               childrenIn,
@@ -5318,16 +5326,16 @@
       });
     };
   };
-  var evalQ = function(render) {
+  var evalQ = function(render2) {
     return function(ref2) {
       return function(q2) {
         return bind12(liftEffect4(read(ref2)))(function(v) {
-          return evalM(render)(ref2)(v["component"]["eval"](new Query(map11(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+          return evalM(render2)(ref2)(v["component"]["eval"](new Query(map11(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
   };
-  var evalM = function(render) {
+  var evalM = function(render2) {
     return function(initRef) {
       return function(v) {
         var evalChildQuery = function(ref2) {
@@ -5337,7 +5345,7 @@
                 var evalChild = function(v3) {
                   return parallel3(bind12(liftEffect4(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
-                      return evalQ(render)(ds.selfRef)(v2.value1);
+                      return evalQ(render2)(ds.selfRef)(v2.value1);
                     })(dsx);
                   }));
                 };
@@ -5374,7 +5382,7 @@
                     lifecycleHandlers: v2.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render(v2.lifecycleHandlers)(ref2)))(function() {
+                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render2(v2.lifecycleHandlers)(ref2)))(function() {
                       return pure6(v3.value0);
                     });
                   });
@@ -5387,7 +5395,7 @@
             if (v1 instanceof Subscribe) {
               return bind12(fresh(SubscriptionId)(ref2))(function(sid) {
                 return bind12(liftEffect4(subscribe(v1.value0(sid))(function(act) {
-                  return handleAff(evalF(render)(ref2)(new Action(act)));
+                  return handleAff(evalF(render2)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind12(liftEffect4(read(ref2)))(function(v2) {
                     return discard1(liftEffect4(modify_2(map22(insert3(sid)(finalize)))(v2.subscriptions)))(function() {
@@ -5424,7 +5432,7 @@
             ;
             if (v1 instanceof Par) {
               return sequential2(retractFreeAp2(hoistFreeAp(function() {
-                var $119 = evalM(render)(ref2);
+                var $119 = evalM(render2)(ref2);
                 return function($120) {
                   return parallel3($119($120));
                 };
@@ -5438,7 +5446,7 @@
                     return bind12(fork3($$finally(liftEffect4(function __do2() {
                       modify_2($$delete2(fid))(v2.forks)();
                       return write(true)(doneRef)();
-                    }))(evalM(render)(ref2)(v1.value0))))(function(fiber) {
+                    }))(evalM(render2)(ref2)(v1.value0))))(function(fiber) {
                       return discard1(liftEffect4(unlessM2(read(doneRef))(modify_2(insert1(fid)(fiber))(v2.forks))))(function() {
                         return pure6(v1.value1(fid));
                       });
@@ -5481,7 +5489,7 @@
       };
     };
   };
-  var evalF = function(render) {
+  var evalF = function(render2) {
     return function(ref2) {
       return function(v) {
         if (v instanceof RefUpdate) {
@@ -5509,7 +5517,7 @@
         ;
         if (v instanceof Action) {
           return bind12(liftEffect4(read(ref2)))(function(v1) {
-            return evalM(render)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
+            return evalM(render2)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
           });
         }
         ;
@@ -5575,12 +5583,12 @@
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component2) {
+    return function(component) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
             return unDriverStateX(function(st) {
-              var parentInitializer = evalM(render)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
+              var parentInitializer = evalM(render2)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_2(function(handlers) {
                 return {
                   initializers: new Cons(discard22(parSequence_3(reverse2(handlers.initializers)))(function() {
@@ -5610,7 +5618,7 @@
                     finalizers: pre2.finalizers
                   })(lchs)();
                   bindFlipped6(unDriverStateX(function() {
-                    var $63 = render(lchs);
+                    var $63 = render2(lchs);
                     return function($64) {
                       return $63(function(v) {
                         return v.selfRef;
@@ -5643,7 +5651,7 @@
                                 return $65(slot.output($66));
                               };
                             }())();
-                            return handleAff(evalM(render)(st.selfRef)(st["component"]["eval"](new Receive(slot.input, unit))))();
+                            return handleAff(evalM(render2)(st.selfRef)(st["component"]["eval"](new Receive(slot.input, unit))))();
                           };
                         })(dsx)();
                         return childrenIn.value0.value0;
@@ -5682,7 +5690,7 @@
             };
           };
         };
-        var render = function(lchs) {
+        var render2 = function(lchs) {
           return function($$var2) {
             return function __do2() {
               var v = read($$var2)();
@@ -5692,7 +5700,7 @@
               write(v.children)(v.childrenIn)();
               var handler3 = function() {
                 var $70 = queueOrRun(v.pendingHandlers);
-                var $71 = evalF(render)(v.selfRef);
+                var $71 = evalF(render2)(v.selfRef);
                 return function($72) {
                   return $70($$void5($71($72)));
                 };
@@ -5761,7 +5769,7 @@
           return unDriverStateX(function(st) {
             return function __do2() {
               cleanupSubscriptionsAndForks(st)();
-              var f = evalM(render)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
+              var f = evalM(render2)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
               modify_2(function(handlers) {
                 return {
                   initializers: handlers.initializers,
@@ -5785,7 +5793,7 @@
                   return pure12(Nothing.value);
                 }
                 ;
-                return evalQ(render)(ref2)(q2);
+                return evalQ(render2)(ref2)(q2);
               });
             };
           };
@@ -5820,7 +5828,7 @@
                 return function($79) {
                   return liftEffect5($78($79));
                 };
-              }())(i2)(component2))();
+              }())(i2)(component))();
               return unDriverStateX(function(st) {
                 return pure7({
                   query: evalDriver(disposed)(st.selfRef),
@@ -5997,9 +6005,9 @@
             };
           });
           var patch = $lazy_patch(91);
-          var render = $lazy_render(82);
+          var render2 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
-          return render;
+          return render2;
         };
         var buildAttributes = buildProp(handler3);
         return {
@@ -6012,7 +6020,7 @@
   };
   var renderSpec = function(document2) {
     return function(container) {
-      var render = function(handler3) {
+      var render2 = function(handler3) {
         return function(child) {
           return function(v) {
             return function(v1) {
@@ -6053,18 +6061,18 @@
         };
       };
       return {
-        render,
+        render: render2,
         renderChild: identity6,
         removeChild: removeChild3,
         dispose: removeChild3
       };
     };
   };
-  var runUI2 = function(component2) {
+  var runUI2 = function(component) {
     return function(i2) {
       return function(element3) {
         return bind14(liftEffect6(map16(toDocument)(bindFlipped7(document)(windowImpl))))(function(document2) {
-          return runUI(renderSpec(document2)(element3))(component2)(i2);
+          return runUI(renderSpec(document2)(element3))(component)(i2);
         });
       };
     };
@@ -6087,32 +6095,34 @@
     Decrement2.value = new Decrement2();
     return Decrement2;
   }();
-  var component = /* @__PURE__ */ function() {
-    var render = function(state3) {
-      return div_([button([onClick(function(v) {
-        return Decrement.value;
-      })])([text5("-")]), text5(" " + (show2(state3) + " ")), button([onClick(function(v) {
-        return Increment.value;
-      })])([text5("+")])]);
-    };
-    var initialState = function(v) {
-      return 0;
-    };
-    var handleAction = function(v) {
-      if (v instanceof Decrement) {
-        return modify_3(function(state3) {
-          return state3 - 1 | 0;
-        });
-      }
-      ;
+  var render = function(state3) {
+    return div_([button([onClick(function(v) {
+      return Decrement.value;
+    })])([text5("-")]), text5(show2(state3)), button([onClick(function(v) {
+      return Increment.value;
+    })])([text5("+")])]);
+  };
+  var initialState = function(v) {
+    return 0;
+  };
+  var handleAction = function(dictMonadAff) {
+    return function(v) {
       if (v instanceof Increment) {
         return modify_3(function(state3) {
           return state3 + 1 | 0;
         });
       }
       ;
-      throw new Error("Failed pattern match at Main (line 36, column 18 - line 41, column 36): " + [v.constructor.name]);
+      if (v instanceof Decrement) {
+        return modify_3(function(state3) {
+          return state3 - 1 | 0;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at Main (line 51, column 1 - line 51, column 98): " + [v.constructor.name]);
     };
+  };
+  var app = function(dictMonadAff) {
     return mkComponent({
       initialState,
       render,
@@ -6121,12 +6131,13 @@
         receive: defaultEval.receive,
         initialize: defaultEval.initialize,
         finalize: defaultEval.finalize,
-        handleAction
+        handleAction: handleAction(dictMonadAff)
       })
     });
-  }();
+  };
+  var app1 = /* @__PURE__ */ app(monadAffAff);
   var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
-    return runUI2(component)(unit)(body2);
+    return runUI2(app1)(unit)(body2);
   }));
 
   // <stdin>

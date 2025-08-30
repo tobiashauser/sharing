@@ -3,40 +3,68 @@ module Main where
 import Prelude
 
 import Effect (Effect)
-import Halogen as H
+import Effect.Aff.Class (class MonadAff)
+import Halogen (modify_, HalogenM, Component, ComponentHTML, mkComponent, mkEval, defaultEval)
 import Halogen.Aff (awaitBody, runHalogenAff)
-import Halogen.HTML as HH
-import Halogen.HTML.Events as HE
+import Halogen.HTML (div_, button, text)
+import Halogen.HTML.Events (onClick)
 import Halogen.VDom.Driver (runUI)
 
+-------------------------------------------------------------------------------
+--- State
+-------------------------------------------------------------------------------
+
+type State = Int
+
+initialState :: forall input. input -> State
+initialState _ = 0
+
+-------------------------------------------------------------------------------
+--- Actions
+-------------------------------------------------------------------------------
+
+data Action = Increment | Decrement 
+
+------------------------------------------------------------------------------- 
+--- Subscriptions
+-------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------- 
+--- Reducer
+-------------------------------------------------------------------------------
+
+--- | Reduce function that transitions state.
+handleAction :: forall output m. MonadAff m => Action -> HalogenM State Action () output m Unit
+handleAction Increment = modify_ \state -> state + 1
+handleAction Decrement = modify_ \state -> state - 1
+
+------------------------------------------------------------------------------- 
+--- Renderer
+-------------------------------------------------------------------------------
+
+render :: forall m. State -> ComponentHTML Action () m
+render state =
+  div_
+    [ button [ onClick \_ -> Decrement ] [ text "-" ]
+    , text (show state)
+    , button [ onClick \_ -> Increment ] [ text "+" ]
+    ]
+    
+------------------------------------------------------------------------------- 
+--- App
+-------------------------------------------------------------------------------
+
+app :: forall query input output m. MonadAff m => Component query input output m
+app = mkComponent { initialState
+                  , render
+                  , eval: mkEval defaultEval { handleAction = handleAction }
+                  }
+  
+------------------------------------------------------------------------------- 
+--- Main
+-------------------------------------------------------------------------------
+
 main :: Effect Unit
-main = runHalogenAff do
+main =runHalogenAff do
   body <- awaitBody
-  runUI component unit body
-
-data Action = Increment | Decrement
-
-component :: forall query input output m. H.Component query input output m
-component =
-  H.mkComponent
-    { initialState
-    , render
-    , eval: H.mkEval H.defaultEval { handleAction = handleAction }
-    }
-  where
-  initialState _ = 0
-
-  render state =
-    HH.div_
-      [ HH.button [ HE.onClick \_ -> Decrement ] [ HH.text "-" ]
-      , HH.text $ " " <> (show state) <> " "
-      , HH.button [ HE.onClick \_ -> Increment ] [ HH.text "+" ]
-      ]
-
-  handleAction = case _ of
-    Decrement ->
-      H.modify_ \state -> state - 1
-
-    Increment ->
-      H.modify_ \state -> state + 1
-            
+  runUI app unit body
