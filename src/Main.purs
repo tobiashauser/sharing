@@ -29,7 +29,7 @@ component =
   render state =
     HH.div_
       [ HH.button [ HE.onClick \_ -> Decrement ] [ HH.text "-" ]
-      , HH.text (show state)
+      , HH.text $ " " <> (show state) <> " "
       , HH.button [ HE.onClick \_ -> Increment ] [ HH.text "+" ]
       ]
 

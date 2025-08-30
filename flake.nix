@@ -22,7 +22,7 @@
       };
 
       # Create some convenient scripts to build and run the package.
-      dev = pkgs.writeShellScriptBin "dev" ''
+      start-dev-server = pkgs.writeShellScriptBin "start-dev-server" ''
         ${pkgs.bun}/bin/bun i -D vite 2&>/dev/null
         ${pkgs.watchexec}/bin/watchexec -w src -e purs -- spago bundle --outfile public/index.js &
         ${pkgs.bun}/bin/bunx vite public 2&>/dev/null &
@@ -39,7 +39,7 @@
           haskell-language-server
         ] ++ (with pkgs; [
           bun
-          dev
+          start-dev-server
           nodejs_24
           purescript-language-server
           purs-tidy

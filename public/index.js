@@ -6091,7 +6091,7 @@
     var render = function(state3) {
       return div_([button([onClick(function(v) {
         return Decrement.value;
-      })])([text5("-")]), text5(show2(state3)), button([onClick(function(v) {
+      })])([text5("-")]), text5(" " + (show2(state3) + " ")), button([onClick(function(v) {
         return Increment.value;
       })])([text5("+")])]);
     };
