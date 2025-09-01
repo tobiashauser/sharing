@@ -1,1 +1,1 @@
-((nil . ((project-compile-commands . (("s" . "cd counter; mix phx.server"))))))
+((nil . ((project-compile-commands . (("s" . "mix phx.server"))))))
