@@ -1,6 +1,5 @@
 {
-  description = "An elixir project coming with mix and hex.";
-  # https://nixos.org/manual/nixpkgs/stable/#sec-beam
+  description = "A simple file sharing server.";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";

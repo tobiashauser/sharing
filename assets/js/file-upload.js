@@ -1,0 +1,4 @@
+export default FileUpload = {
+  mounted() {
+  }
+}

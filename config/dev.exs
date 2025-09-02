@@ -15,8 +15,7 @@ config :sharing, SharingWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "ysKkM2443V0HYPjA6ddtOubn4bhO0iyYM4aK4rst5DlBkpp45apBteauJxh7cbqU",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:sharing, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:sharing, ~w(--watch)]}
+    esbuild: {Esbuild, :install_and_run, [:sharing, ~w(--sourcemap=inline --watch)]}
   ]
 
 # ## SSL Support
