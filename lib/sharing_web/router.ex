@@ -16,7 +16,7 @@ defmodule SharingWeb.Router do
 
   scope "/", SharingWeb do
     pipe_through(:browser)
-    live("/", Index)
+    live("/upload-test", UploadTest)
   end
 
   # Other scopes may use custom stacks.
