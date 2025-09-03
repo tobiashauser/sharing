@@ -4,7 +4,7 @@ import Config
 # you can enable the server option below.
 config :sharing, SharingWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
-  secret_key_base: "6uEOPWpbDDLebAHibx+Yx1uogDqLlREOXGqN/pwf8Pf7qszpqf72vrGVIzLvA3zN",
+  secret_key_base: "rPh+HuU0sCsBy5qxyK1viR4RO0Ncct8sqx7EvGIKuOqWhpgHXeiJHAGO7JmmPPd9",
   server: false
 
 # Print only warnings and errors during test

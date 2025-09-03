@@ -46,24 +46,6 @@ defmodule SharingWeb do
     end
   end
 
-  def view do
-    quote do
-      use Phoenix.View,
-        root: "lib/sharing_web/templates",
-        namespace: SharingWeb
-
-      # Import convenience functions from controllers
-      # import Phoenix.Controller,
-      #   only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
-
-      # https://hexdocs.pm/phoenix_live_view/0.18.1/installation.html
-      # import Phoenix.Component
-
-      # Include shared imports and aliases for views
-      # unquote(view_helpers())
-    end
-  end
-
   def live_view do
     quote do
       use Phoenix.LiveView

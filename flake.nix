@@ -18,6 +18,7 @@
             elixir-ls
             erlang-ls
           ] ++ [
+            nodejs_24
           ];
 
           # E.g. install phx with `mix archive.install hex phx_new'.
