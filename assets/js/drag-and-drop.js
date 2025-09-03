@@ -17,32 +17,45 @@ function readFileEntry(entry) {
   });
 }
 
-function readDirectoryEntry(entry) {
-  return new Promise(resolve => {
-    // console.log(entry)
-    let result = [];
-    processEntry(entry, result)
-    // console.log(result)
-    resolve(result)
-  })
-}
+async function readDirectoryEntry(dirEntry) {
+  const result = [];
 
-function processEntry(entry, result) {
-  if (entry instanceof FileSystemFileEntry) {
-    entry.file(file => result.push(file))
-  } else {
-    const reader = entry.createReader();
-    reader.readEntries(entries => {
-      entries.forEach(entry => {
-	processEntry(entry, result)
-      })
-    })
+  // Helper: grab ALL entries from a reader (handles pagination).
+  const readAll = (reader) =>
+    new Promise((resolve, reject) => {
+      const all = [];
+      (function read() {
+        reader.readEntries(
+          (batch) => {
+            if (batch.length === 0) resolve(all);
+            else {
+              all.push(...batch);
+              read(); // keep reading until empty
+            }
+          },
+          reject
+        );
+      })();
+    });
+
+  async function walk(entry) {
+    if (entry.isFile) {
+      const file = await readFileEntry(entry);
+      result.push(file);
+    } else if (entry.isDirectory) {
+      const entries = await readAll(entry.createReader());
+      await Promise.all(entries.map(walk));
+    }
   }
+
+  await walk(dirEntry);
+  return result;
 }
 
 // Keep track of a little internal state to work around the event
 // triggers for every element.
 let state = 0
+let fileIds = []
 
 export default WindowDragEvents = {
   mounted() {
@@ -86,18 +99,27 @@ export default WindowDragEvents = {
         const entry = entries[i].getAsEntry ? entries[i].getAsEntry() : entries[i].webkitGetAsEntry();
         if (entry instanceof FileSystemFileEntry) {
 	  readFileEntry(entry)
-	    .then(file => this.upload("files", [file]))
+	    .then(file => {
+	      this.upload("files", [file])
+	    })
         } else {
 	  readDirectoryEntry(entry)
-	    .then(files => console.log(files.length == 0))
+	    .then(files => {
+	      this.upload("files", files)
+	    })
 	}
       }
+    };
+
+    this.handleFileIds = (event) => {
+      fileIds = event.detail.ids
     };
 
     window.addEventListener("dragenter", this.handleDragEnter);
     window.addEventListener("dragleave", this.handleDragLeave);
     window.addEventListener("dragover", this.handleDragOver);
     window.addEventListener("drop", this.handleDrop);
+    window.addEventListener("phx:file-ids", this.handleFileIds);
   },
 
   destroyed() {
@@ -105,5 +127,6 @@ export default WindowDragEvents = {
     window.removeEventListener("dragleave", this.handleDragLeave);
     window.removeEventListener("dragover", this.handleDragOver);
     window.removeEventListener("drop", this.handleDrop);
+    window.removeEventListener("phx:file-ids", this.handleFileIds);
   }
 };

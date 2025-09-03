@@ -27,9 +27,18 @@ defmodule SharingWeb.UploadTest do
     {:noreply, socket |> assign(:dragging, false)}
   end
 
+  # Calculate unique ids from all entries and push them to the
+  # DragAndDrop javascript handler.
   def handle_event("validate", params, socket) do
-    dbg(socket.assigns.uploads.files)
-    {:noreply, socket}
+    ids =
+      socket.assigns.uploads.files.entries
+      |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
+
+    {
+      :noreply,
+      socket
+      |> push_event("file-ids", %{ids: ids})
+    }
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
