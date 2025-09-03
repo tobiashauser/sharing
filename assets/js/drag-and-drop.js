@@ -5,16 +5,7 @@
 // https://hexdocs.pm/phoenix_live_view/js-interop.html#client-hooks-via-phx-hook
 
 function readFileEntry(entry) {
-  return new Promise((resolve, reject) => {
-    entry.file(
-      (file) => {
-        resolve(file);
-      },
-      (error) => {
-        reject(error);
-      },
-    );
-  });
+  return new Promise((resolve, reject) => entry.file(resolve, reject))
 }
 
 async function readDirectoryEntry(dirEntry) {
@@ -52,13 +43,21 @@ async function readDirectoryEntry(dirEntry) {
   return result;
 }
 
+function fileId(file) {
+  return file.name + ":" + file.webkitRelativePath
+}
+
 // Keep track of a little internal state to work around the event
 // triggers for every element.
 let state = 0
 let fileIds = []
 
+// Add this object to the livesocket configuration:
+//
+//    new LiveSocket(hooks: { ..., WindowDragEvents })
 export default WindowDragEvents = {
   mounted() {
+    console.log("Mounted window drag events")
     state = 0;
     
     this.handleDragEnter = (event) => {
@@ -100,18 +99,33 @@ export default WindowDragEvents = {
         if (entry instanceof FileSystemFileEntry) {
 	  readFileEntry(entry)
 	    .then(file => {
-	      this.upload("files", [file])
+	      if (!fileIds.includes(fileId(file))) {
+		this.upload("files", [file])
+	      }
 	    })
         } else {
 	  readDirectoryEntry(entry)
 	    .then(files => {
-	      this.upload("files", files)
+	      this.upload(
+		"files",
+		files.filter(file => !fileIds.includes(fileId(file)))
+	      )
 	    })
 	}
       }
     };
 
+    // An event triggered from the server that sends a list of of ids
+    // of the files that are currently selected in the uploader. This
+    // allows us to skip adding duplicates.
+    //
+    // [FIXME] Currently, we are not hooking into the file selection
+    // from the picker, only the drag and drop events. So it is still
+    // possible to add the same file multiple times.
+    //
+    // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
+      console.log(event)
       fileIds = event.detail.ids
     };
 

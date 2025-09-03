@@ -29,20 +29,17 @@ defmodule SharingWeb.UploadTest do
 
   # Calculate unique ids from all entries and push them to the
   # DragAndDrop javascript handler.
-  def handle_event("validate", params, socket) do
-    ids =
-      socket.assigns.uploads.files.entries
-      |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
-
-    {
-      :noreply,
-      socket
-      |> push_event("file-ids", %{ids: ids})
-    }
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket |> push_file_ids()}
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
-    {:noreply, cancel_upload(socket, :files, ref)}
+    {
+      :noreply,
+      socket
+      |> cancel_upload(:files, ref)
+      |> push_file_ids()
+    }
   end
 
   def handle_event("upload", _params, socket) do
@@ -55,7 +52,17 @@ defmodule SharingWeb.UploadTest do
         {:ok, ~p"/uploads/#{Path.basename(dest)}"}
       end)
 
-    {:noreply, update(socket, :uploaded_files, &(&1 ++ uploaded_files))}
+    {:noreply, socket |> update(:uploaded_files, &(&1 ++ uploaded_files))}
+  end
+
+  defp push_file_ids(socket) do
+    ids =
+      socket.assigns.uploads.files.entries
+      # The schema by which the fileIds are created must be kept in sync with
+      # `drag-and-drop.js`.
+      |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
+
+    socket |> push_event("file-ids", %{ids: ids})
   end
 
   defp error_to_string(:too_large), do: "Too large"
