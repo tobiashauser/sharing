@@ -15,7 +15,7 @@ defmodule SharingWeb.Index do
 
   defp action_button(assigns) do
     ~H"""
-    <div class="bg-blue-400">Action Button</div>
+    <div class="bg-blue-400 w-40">Action Button</div>
     """
   end
 
@@ -41,6 +41,10 @@ defmodule SharingWeb.Index do
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
+  def handle_event("animate", _params, socket) do
+    {:noreply, push_event(socket, "gsap.to", %{id: "#my-animation", vars: %{x: 200, y: 50}})}
+  end
+
   def render(assigns) do
     ~H"""
     <div class="flex justify-between">
@@ -52,7 +56,9 @@ defmodule SharingWeb.Index do
     """
 
     ~H"""
-    <.action_button />
+    <div class="bg-blue-400 m-2 w-40 py-4" id="my-animation" />
+
+    <button phx-click="animate">animate</button>
     """
   end
 end
