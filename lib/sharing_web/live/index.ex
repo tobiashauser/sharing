@@ -5,12 +5,30 @@ defmodule SharingWeb.Index do
   alias SharingWeb.ActionButton
 
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {
+      :ok,
+      socket
+      |> assign(:dragging, false)
+      |> assign(:uploaded_files, [])
+      |> allow_upload(:files, accept: :any, max_entries: 100)
+    }
   end
 
   ### --------------------------------------------------------------------- ###
   ### Actions                                                               ###
   ### --------------------------------------------------------------------- ###
+
+  defp push_file_ids(socket) do
+    ids =
+      socket.assigns.uploads.files.entries
+      # The schema by which the fileIds are created must be kept in sync with
+      # `drag-and-drop.js`.
+      |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
+
+    socket |> push_event("file-ids", %{ids: ids})
+  end
+
+  ### Action Button ---------------------------------------
 
   def handle_event("show-input", _params, socket) do
     {:noreply, ActionButton.show_input(socket)}
@@ -22,6 +40,44 @@ defmodule SharingWeb.Index do
 
   def handle_event("show-code", _params, socket) do
     {:noreply, ActionButton.show_code(socket)}
+  end
+
+  ### File Uploads ----------------------------------------
+
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket |> push_file_ids()}
+  end
+
+  def handle_event("cancel-upload", %{"ref" => ref}, socket) do
+    {
+      :noreply,
+      socket
+      |> cancel_upload(:files, ref)
+      |> push_file_ids()
+    }
+  end
+
+  def handle_event("upload", _params, socket) do
+    uploaded_files = []
+    {:noreply, socket |> update(:uploaded_files, &(&1 ++ uploaded_files))}
+  end
+
+  ### Drag and Drop ---------------------------------------
+
+  def handle_event("dragenter", _params, socket) do
+    {:noreply, socket |> assign(:dragging, true)}
+  end
+
+  def handle_event("dragleave", _params, socket) do
+    {:noreply, socket |> assign(:dragging, false)}
+  end
+
+  def handle_event("dragover", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("drop", _params, socket) do
+    {:noreply, socket |> assign(:dragging, false)}
   end
 
   ### --------------------------------------------------------------------- ###
@@ -42,17 +98,29 @@ defmodule SharingWeb.Index do
 
   ### Drop Area -------------------------------------------
 
+  # Must contain a button with type submit!
   defp drop_area(assigns) do
     ~H"""
-    <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)] bg-green-400">Drop Area</div>
+    <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
+      <div class="flex justify-center">
+        <div class="m-6 h-40 max-w-md w-2/3 border">
+          Drop Area
+        </div>
+      </div>
+    </div>
     """
   end
 
   ### Item Cards ------------------------------------------
 
+  # TODO Continue here!
   defp item_cards(assigns) do
     ~H"""
-    <div class="bg-red-400">Item Card</div>
+    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div class="border">
+        Item Cards
+      </div>
+    </div>
     """
   end
 
@@ -61,6 +129,8 @@ defmodule SharingWeb.Index do
   ### --------------------------------------------------------------------- ###
 
   def render(assigns) do
+    dbg(assigns.uploads.files)
+
     ~H"""
     <div class="flex justify-between">
       <ActionButton.render
@@ -70,7 +140,17 @@ defmodule SharingWeb.Index do
         class="border-2"
       />
     </div>
-    <.drop_area />
+    <form
+      id="file-upload-form"
+      phx-hook="WindowDragEvents"
+      phx-submit="upload"
+      phx-change="validate">
+      <.drop_area />
+      <.live_file_input
+        class="sr-only"
+        upload={@uploads.files}
+      />
+    </form>
     <.item_cards />
     """
   end

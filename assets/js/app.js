@@ -26,12 +26,13 @@ import {hooks as colocatedHooks} from "phoenix-colocated/sharing"
 import topbar from "../vendor/topbar"
 
 import "./gsap"
+import WindowDragEvents from "./drag-and-drop"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, WindowDragEvents},
 })
 
 // Show progress bar on live navigation and form submits
@@ -66,7 +67,7 @@ if (process.env.NODE_ENV === "development") {
     //   * click with "d" key pressed to open at function component definition location
     let keyDown
     window.addEventListener("keydown", e => keyDown = e.key)
-    window.addEventListener("keyup", e => keyDown = null)
+    window.addEventListener("keyup", _ => keyDown = null)
     window.addEventListener("click", e => {
       if(keyDown === "c"){
         e.preventDefault()
