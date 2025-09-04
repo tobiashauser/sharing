@@ -176,12 +176,13 @@ defmodule SharingWeb.ActionButton do
     """
   end
 
+  attr(:class, :string, default: "")
   attr(:generatedCode, :string, default: "No code provided")
 
   def render(assigns) do
     ~H"""
     <div class="flex justify-start">
-      <div class="border-2 rounded-sm items-center inline-flex text-sm font-semibold truncate text-clip">
+      <div class={"items-center inline-flex truncate text-clip" <> " " <> @class}>
         <.action_button_input
           class="w-0"
           contentClass="invisible opacity-0 focus:outline-none"

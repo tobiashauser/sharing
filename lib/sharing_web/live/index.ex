@@ -12,15 +12,31 @@ defmodule SharingWeb.Index do
   ### Actions                                                               ###
   ### --------------------------------------------------------------------- ###
 
+  def handle_event("show-input", _params, socket) do
+    {:noreply, ActionButton.show_input(socket)}
+  end
+
+  def handle_event("show-button", _params, socket) do
+    {:noreply, ActionButton.show_button(socket)}
+  end
+
+  def handle_event("show-code", _params, socket) do
+    {:noreply, ActionButton.show_code(socket)}
+  end
+
   ### --------------------------------------------------------------------- ###
   ### Components                                                            ###
   ### --------------------------------------------------------------------- ###
 
   ### Help Button -----------------------------------------
 
+  attr(:class, :string, default: "")
+
   defp help_button(assigns) do
     ~H"""
-    <div class="bg-blue-400">Help</div>
+    <div class={"flex-col items-center" <> " " <> @class}>
+      <.icon name="hero-question-mark-circle" />
+    </div>
     """
   end
 
@@ -44,45 +60,18 @@ defmodule SharingWeb.Index do
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
-  def handle_event("show-input", _params, socket) do
-    {:noreply, ActionButton.show_input(socket)}
-  end
-
-  def handle_event("show-button", _params, socket) do
-    {:noreply, ActionButton.show_button(socket)}
-  end
-
-  def handle_event("show-code", _params, socket) do
-    {:noreply, ActionButton.show_code(socket)}
-  end
-
-  def handle_event("animate-2", _params, socket) do
-    {
-      :noreply,
-      socket
-      |> push_event("gsap.to", %{id: "#my-animation", vars: %{x: 100, y: 20}})
-      |> push_event("gsap.to", %{id: "#my-animation", vars: %{rotation: 27}})
-    }
-  end
-
   def render(assigns) do
     ~H"""
     <div class="flex justify-between">
-      <ActionButton.render />
-      <.help_button />
+      <ActionButton.render
+        class="border-2"
+      />
+      <.help_button
+        class="border-2"
+      />
     </div>
     <.drop_area />
     <.item_cards />
-    """
-
-    ~H"""
-    <div class="m-2">
-      <ActionButton.render generatedCode="promiscous-giraffe" />
-
-      <button phx-click="show-input" class="mt-4">Show Input</button>
-      <button phx-click="show-button" class="mt-4">Show Button</button>
-      <button phx-click="show-code" class="mt-4">Show Code</button>
-    </div>
     """
   end
 end
