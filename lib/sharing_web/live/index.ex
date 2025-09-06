@@ -2,6 +2,7 @@ defmodule SharingWeb.Index do
   use SharingWeb, :live_view
 
   alias SharingWeb.ActionButton
+  alias SharingWeb.DropArea
   alias SharingWeb.Info
   alias SharingWeb.ItemCard
 
@@ -105,11 +106,7 @@ defmodule SharingWeb.Index do
     ~H"""
     <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
       <div class="flex justify-center">
-        <div
-          class="m-6 h-40 max-w-md w-2/3 border"
-          phx-click="open-file-picker">
-          Drop Area
-        </div>
+        <DropArea.render />
       </div>
     </div>
     """
