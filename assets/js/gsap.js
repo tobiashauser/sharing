@@ -1,4 +1,5 @@
-// A small wrapper around gsap that triggers animations coming from the server.
+// A small wrapper around gsap that triggers animations initiated by
+// the server.
 import gsap from "../vendor/gsap";
 
 window.addEventListener("phx:gsap.to", (e) => {
