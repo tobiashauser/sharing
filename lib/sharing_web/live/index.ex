@@ -3,6 +3,7 @@ defmodule SharingWeb.Index do
 
   import GSAP
   alias SharingWeb.ActionButton
+  alias SharingWeb.ItemCard
 
   def mount(_params, _session, socket) do
     {
@@ -111,26 +112,11 @@ defmodule SharingWeb.Index do
     """
   end
 
-  ### Item Cards ------------------------------------------
-
-  # TODO Continue here!
-  defp item_cards(assigns) do
-    ~H"""
-    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div class="border">
-        Item Cards
-      </div>
-    </div>
-    """
-  end
-
   ### --------------------------------------------------------------------- ###
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
   def render(assigns) do
-    dbg(assigns.uploads.files)
-
     ~H"""
     <div class="flex justify-between">
       <ActionButton.render
@@ -151,7 +137,9 @@ defmodule SharingWeb.Index do
         upload={@uploads.files}
       />
     </form>
-    <.item_cards />
+    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ItemCard.render :for={item <- ItemCard.normalize(@uploads.files)} item={item} />
+    </div>
     """
   end
 end
