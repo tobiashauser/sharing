@@ -1,8 +1,8 @@
 defmodule SharingWeb.Index do
   use SharingWeb, :live_view
 
-  import GSAP
   alias SharingWeb.ActionButton
+  alias SharingWeb.Info
   alias SharingWeb.ItemCard
 
   def mount(_params, _session, socket) do
@@ -93,11 +93,8 @@ defmodule SharingWeb.Index do
 
   attr(:class, :string, default: "")
 
-  defp help_button(assigns) do
+  defp info_button(assigns) do
     ~H"""
-    <div class={"flex-col items-center" <> " " <> @class}>
-      <.icon name="hero-question-mark-circle" />
-    </div>
     """
   end
 
@@ -126,7 +123,7 @@ defmodule SharingWeb.Index do
     ~H"""
     <div class="flex justify-between">
       <ActionButton.render class="border-2" />
-      <.help_button class="border-2" />
+      <Info.render class="border-2"/>
     </div>
     <form
       id="file-upload-form"
