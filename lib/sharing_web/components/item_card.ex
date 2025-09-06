@@ -42,7 +42,7 @@ defmodule SharingWeb.ItemCard do
 
   def render(%{item: %{file: _}} = assigns) do
     ~H"""
-    <div>
+    <div class="bg-elevated">
       {@item.file.client_name}
     </div>
     """
@@ -50,7 +50,7 @@ defmodule SharingWeb.ItemCard do
 
   def render(%{item: %{folder: _}} = assigns) do
     ~H"""
-    <div>
+    <div class="bg-elevated">
       {@item.name} {@item.size}
     </div>
     """
