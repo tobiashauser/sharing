@@ -81,6 +81,10 @@ defmodule SharingWeb.Index do
     {:noreply, socket |> assign(:dragging, false)}
   end
 
+  def handle_event("open-file-picker", _params, socket) do
+    {:noreply, socket |> push_event("click", %{ref: socket.assigns.uploads.files.ref})}
+  end
+
   ### --------------------------------------------------------------------- ###
   ### Components                                                            ###
   ### --------------------------------------------------------------------- ###
@@ -104,7 +108,9 @@ defmodule SharingWeb.Index do
     ~H"""
     <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
       <div class="flex justify-center">
-        <div class="m-6 h-40 max-w-md w-2/3 border">
+        <div
+          class="m-6 h-40 max-w-md w-2/3 border"
+          phx-click="open-file-picker">
           Drop Area
         </div>
       </div>
@@ -119,26 +125,25 @@ defmodule SharingWeb.Index do
   def render(assigns) do
     ~H"""
     <div class="flex justify-between">
-      <ActionButton.render
-        class="border-2"
-      />
-      <.help_button
-        class="border-2"
-      />
+      <ActionButton.render class="border-2" />
+      <.help_button class="border-2" />
     </div>
     <form
       id="file-upload-form"
-      phx-hook="WindowDragEvents"
+      phx-hook="WindowDragEvents" 
       phx-submit="upload"
       phx-change="validate">
-      <.drop_area />
+      <.drop_area/>
       <.live_file_input
         class="sr-only"
         upload={@uploads.files}
       />
     </form>
-    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 gap-2 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <ItemCard.render :for={item <- ItemCard.normalize(@uploads.files)} item={item} />
+    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <ItemCard.render
+        :for={item <- ItemCard.normalize(@uploads.files)}
+        item={item}
+      />
     </div>
     """
   end

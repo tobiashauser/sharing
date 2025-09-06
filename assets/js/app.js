@@ -25,6 +25,7 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/sharing"
 import topbar from "../vendor/topbar"
 
+import "./click"
 import "./gsap"
 import WindowDragEvents from "./drag-and-drop"
 
