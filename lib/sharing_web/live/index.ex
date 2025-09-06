@@ -133,7 +133,7 @@ defmodule SharingWeb.Index do
         upload={@uploads.files}
       />
     </form>
-    <div class="md:snap-x md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <ItemCard.render
         :for={item <- ItemCard.normalize(@uploads.files)}
         item={item}
