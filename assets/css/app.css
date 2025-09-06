@@ -53,7 +53,9 @@
   --radius: 0.625rem;
 
   /* Apply standard styles. */
-  @apply bg-base text-foreground;
+  @apply bg-base text-foreground m-2;
 }
 
-
+.center-content {
+  @apply flex flex-col items-center justify-center
+}
