@@ -15,8 +15,15 @@ defmodule SharingWeb.DropArea do
 
   def content(assigns) do
     ~H"""
-    <div class="border p-3 border-overlay rounded-full mb-3 center-content dragging:bg-blue-200" >
-      <.icon name="hero-arrow-up-tray" class="size-5 text-subtle" />
+    <div class={
+      "p-3 mb-3 center-content transition"
+      <> " border-2 border-subtle/40 rounded-full"
+      <> " dragging:border-salient dragging:bg-salient/10"
+      }>
+      <.icon
+        name="hero-arrow-up-tray-mini"
+        class="size-5 text-subtle/70 dragging:text-salient"
+      />
     </div>
     <p class="text-sm mb-1.5 font-medium">Upload files</p>
     <p class="text-subtle text-xs">Drag & Drop or click to browser</p>
@@ -32,7 +39,12 @@ defmodule SharingWeb.DropArea do
       phx-hook="MouseEvents"
       class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class}
       phx-click="open-file-picker">
-      <div class="m-4 center-content drag:border">
+      <div class={
+        "m-4 center-content transition" 
+        <> " border-2 border-transparent rounded-[9px] border-dashed"
+        <> " hovering:border-muted hovering:bg-elevated"
+        <> " dragging:border-salient dragging:bg-salient/5"
+      }>
         <.content />
       </div>  
     </div>

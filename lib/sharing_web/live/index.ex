@@ -65,18 +65,6 @@ defmodule SharingWeb.Index do
 
   ### Drag and Drop ---------------------------------------
 
-  # def handle_event("dragenter", _params, socket) do
-  #   {:noreply, socket |> assign(:dragging, true)}
-  # end
-
-  # def handle_event("dragleave", _params, socket) do
-  #   {:noreply, socket |> assign(:dragging, false)}
-  # end
-
-  # def handle_event("dragover", _params, socket) do
-  #   {:noreply, socket}
-  # end
-
   def handle_event("drop", _params, socket) do
     {:noreply, socket |> assign(:dragging, false)}
   end
@@ -94,7 +82,7 @@ defmodule SharingWeb.Index do
     ~H"""
     <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
       <div class="flex justify-center">
-        <DropArea.render class="h-40 max-w-md w-2/3" />
+        <DropArea.render class="h-44 max-w-md w-2/3 cursor-pointer" />
       </div>
     </div>
     """
@@ -106,24 +94,26 @@ defmodule SharingWeb.Index do
 
   def render(assigns) do
     ~H"""
-    <div class="flex justify-between">
-      <ActionButton.render class="border-2" />
-      <Info.render class="border-2"/>
-    </div>
-    <form
-      phx-submit="upload"
-      phx-change="validate">
-      <.drop_area/>
-      <.live_file_input
-        class="sr-only"
-        upload={@uploads.files}
-      />
-    </form>
-    <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <ItemCard.render
-        :for={item <- ItemCard.normalize(@uploads.files)}
-        item={item}
-      />
+    <div class="flex flex-col gap-6">
+      <div class="flex justify-between">
+        <ActionButton.render class="border-2" />
+        <Info.render class="border-2"/>
+      </div>
+      <form
+        phx-submit="upload"
+        phx-change="validate">
+        <.drop_area/>
+        <.live_file_input
+          class="sr-only"
+          upload={@uploads.files}
+        />
+      </form>
+      <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <ItemCard.render
+          :for={item <- ItemCard.normalize(@uploads.files)}
+          item={item}
+        />
+      </div>
     </div>
     """
   end
