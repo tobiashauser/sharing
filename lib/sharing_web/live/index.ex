@@ -10,7 +10,6 @@ defmodule SharingWeb.Index do
     {
       :ok,
       socket
-      |> assign(:dragging, false)
       |> assign(:uploaded_files, [])
       |> allow_upload(:files, accept: :any, max_entries: 100)
     }
@@ -33,15 +32,15 @@ defmodule SharingWeb.Index do
   ### Action Button ---------------------------------------
 
   def handle_event("show-input", _params, socket) do
-    {:noreply, ActionButton.show_input(socket)}
+    {:noreply, socket |> ActionButton.show_input()}
   end
 
   def handle_event("show-button", _params, socket) do
-    {:noreply, ActionButton.show_button(socket)}
+    {:noreply, socket |> ActionButton.show_button()}
   end
 
   def handle_event("show-code", _params, socket) do
-    {:noreply, ActionButton.show_code(socket)}
+    {:noreply, socket |> ActionButton.show_code()}
   end
 
   ### File Uploads ----------------------------------------
@@ -66,17 +65,17 @@ defmodule SharingWeb.Index do
 
   ### Drag and Drop ---------------------------------------
 
-  def handle_event("dragenter", _params, socket) do
-    {:noreply, socket |> assign(:dragging, true)}
-  end
+  # def handle_event("dragenter", _params, socket) do
+  #   {:noreply, socket |> assign(:dragging, true)}
+  # end
 
-  def handle_event("dragleave", _params, socket) do
-    {:noreply, socket |> assign(:dragging, false)}
-  end
+  # def handle_event("dragleave", _params, socket) do
+  #   {:noreply, socket |> assign(:dragging, false)}
+  # end
 
-  def handle_event("dragover", _params, socket) do
-    {:noreply, socket}
-  end
+  # def handle_event("dragover", _params, socket) do
+  #   {:noreply, socket}
+  # end
 
   def handle_event("drop", _params, socket) do
     {:noreply, socket |> assign(:dragging, false)}
@@ -90,23 +89,12 @@ defmodule SharingWeb.Index do
   ### Components                                                            ###
   ### --------------------------------------------------------------------- ###
 
-  ### Help Button -----------------------------------------
-
-  attr(:class, :string, default: "")
-
-  defp info_button(assigns) do
-    ~H"""
-    """
-  end
-
-  ### Drop Area -------------------------------------------
-
   # Must contain a button with type submit!
   defp drop_area(assigns) do
     ~H"""
     <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
       <div class="flex justify-center">
-        <DropArea.render />
+        <DropArea.render class="h-40 max-w-md w-2/3" />
       </div>
     </div>
     """
@@ -123,8 +111,6 @@ defmodule SharingWeb.Index do
       <Info.render class="border-2"/>
     </div>
     <form
-      id="file-upload-form"
-      phx-hook="WindowDragEvents" 
       phx-submit="upload"
       phx-change="validate">
       <.drop_area/>

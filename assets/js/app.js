@@ -28,12 +28,13 @@ import topbar from "../vendor/topbar"
 import "./click"
 import "./gsap"
 import WindowDragEvents from "./drag-and-drop"
+import MouseEvents from "./mouse-events"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, WindowDragEvents},
+  hooks: {...colocatedHooks, WindowDragEvents, MouseEvents},
 })
 
 // Show progress bar on live navigation and form submits

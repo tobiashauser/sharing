@@ -66,7 +66,7 @@ export default WindowDragEvents = {
       state++;
 
       if (state == 1) {
-	this.pushEvent("dragenter");
+        this.el.setAttribute("data-dragging", true);
       }
     };
 
@@ -76,7 +76,7 @@ export default WindowDragEvents = {
       state--;
 
       if (state == 0) {
-	this.pushEvent("dragleave");
+        this.el.setAttribute("data-dragging", "false");
       };
     };
 
@@ -90,7 +90,7 @@ export default WindowDragEvents = {
       event.stopPropagation();
       
       // The drag event has ended.
-      this.pushEvent("dragleave");
+      this.el.setAttribute("data-dragging", "false");
       state = 0;
 
       const entries = event.dataTransfer.items;
@@ -125,7 +125,6 @@ export default WindowDragEvents = {
     //
     // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
-      console.log(event.detail.ids)
       fileIds = event.detail.ids
     };
 
