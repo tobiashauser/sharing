@@ -23,11 +23,11 @@ defmodule SharingWeb.ItemCard do
             |> List.first()
 
           case acc do
-            [%{name: name, size: size} | rest] when name == folder_name ->
-              [%{folder: true, name: folder_name, size: size + 1} | rest]
+            [%{name: name, size: size, refs: refs} | rest] when name == folder_name ->
+              [%{folder: true, name: folder_name, size: size + 1, refs: [item.ref | refs]} | rest]
 
             _ ->
-              [%{folder: true, name: folder_name, size: 1} | acc]
+              [%{folder: true, name: folder_name, size: 1, refs: [item.ref]} | acc]
           end
       end
     end)
@@ -38,21 +38,105 @@ defmodule SharingWeb.ItemCard do
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
+  ### Symbol ----------------------------------------------
+
+  attr(:class, :string, default: "")
+  attr(:item, :map)
+
+  def symbol(%{item: %{file: %{client_type: "text/plain"}}} = assigns) do
+    ~H"""
+    <div class={@class}>
+      <span class="hero-folder-solid size-5" />
+    </div>
+    """
+  end
+
+  def symbol(%{item: %{folder: _}} = assigns) do
+    ~H"""
+    <div class={@class}>
+      <span class="hero-folder-solid size-5" />
+    </div>
+    """
+  end
+
+  def symbol(assigns) do
+    ~H"""
+    <div class={@class}>
+      <span class="hero-document-solid size-5" />
+    </div>
+    """
+  end
+
+  ### Cancel Button ---------------------------------------
+
+  attr(:class, :string, default: "")
+  attr(:item, :map)
+
+  def cancel(%{item: %{file: _}} = assigns) do
+    dbg(assigns)
+
+    ~H"""
+    <span
+      class={@class}
+      phx-click="cancel-upload"
+      phx-value-ref={@item.file.ref}
+    />
+    """
+  end
+
+  def cancel(%{item: %{folder: _}} = assigns) do
+    dbg(assigns)
+
+    ~H"""
+    <span
+      class={@class}
+      phx-click={JS.push("cancel-upload", value: %{refs: @item.refs})}
+    />
+    """
+  end
+
+  ### Card ------------------------------------------------
+
+  attr(:title, :string)
+  attr(:item, :map)
+
+  def card(assigns) do
+    ~H"""
+    <div class= "flex items-center gap-2 p-2 rounded border-1 border-surface">
+      <.symbol class="center-content p-2 rounded bg-elevated" item={@item} />
+      <div class="flex justify-between items-center w-full">
+        <div class="flex flex-col">
+          <div class="text-sm font-medium">{@title}</div>
+          <div class="text-subtle text-xs">Info</div>
+        </div>
+        <.cancel
+          class="hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70"
+          item={@item}
+        />
+      </div>
+    </div>
+    """
+  end
+
+  ### Render ----------------------------------------------
+
   attr(:item, :map)
 
   def render(%{item: %{file: _}} = assigns) do
     ~H"""
-    <div class="bg-elevated">
-      {@item.file.client_name}
-    </div>
+    <.card
+      title={@item.file.client_name}
+      item={@item}
+    />
     """
   end
 
   def render(%{item: %{folder: _}} = assigns) do
     ~H"""
-    <div class="bg-elevated">
-      {@item.name} {@item.size}
-    </div>
+    <.card
+      title={@item.name}
+      item={@item}
+    />
     """
   end
 end

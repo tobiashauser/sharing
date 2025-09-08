@@ -18,11 +18,14 @@ defmodule SharingWeb.DropArea do
     <div class={
       "p-3 mb-3 center-content transition"
       <> " border-2 border-subtle/40 rounded-full"
-      <> " dragging:border-salient dragging:bg-salient/10"
+      <> " dragging:border-salient dragging:bg-salient/20"
       }>
-      <.icon
-        name="hero-arrow-up-tray-mini"
-        class="size-5 text-subtle/70 dragging:text-salient"
+      <span
+        class={
+          "size-5 text-subtle/70 dragging:text-salient"
+          <> " hero-arrow-up-tray-mini"
+          <> " dragging:hero-arrow-down-tray-mini"
+        }
       />
     </div>
     <p class="text-sm mb-1.5 font-medium">Upload files</p>
@@ -42,8 +45,8 @@ defmodule SharingWeb.DropArea do
       <div class={
         "m-4 center-content transition" 
         <> " border-2 border-transparent rounded-[9px] border-dashed"
-        <> " hovering:border-muted hovering:bg-elevated"
-        <> " dragging:border-salient dragging:bg-salient/5"
+        <> " hovering:border-overlay hovering:bg-elevated"
+        <> " dragging:border-salient dragging:bg-salient/10"
       }>
         <.content />
       </div>  

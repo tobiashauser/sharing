@@ -11,7 +11,12 @@ defmodule SharingWeb.Index do
       :ok,
       socket
       |> assign(:uploaded_files, [])
-      |> allow_upload(:files, accept: :any, max_entries: 100)
+      |> allow_upload(
+        :files,
+        accept: :any,
+        max_entries: 100,
+        max_file_size: 1_000_000_000
+      )
     }
   end
 
@@ -50,12 +55,16 @@ defmodule SharingWeb.Index do
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
-    {
-      :noreply,
-      socket
-      |> cancel_upload(:files, ref)
-      |> push_file_ids()
-    }
+    handle_event("cancel-upload", %{"refs" => [ref]}, socket)
+  end
+
+  def handle_event("cancel-upload", %{"refs" => refs}, socket) when is_list(refs) do
+    socket =
+      Enum.reduce(refs, socket, fn ref, acc ->
+        cancel_upload(acc, :files, ref)
+      end)
+
+    {:noreply, socket |> push_file_ids()}
   end
 
   def handle_event("upload", _params, socket) do
