@@ -19,9 +19,15 @@ defmodule SharingWeb.Info do
     ~H"""
     <div 
       id="show-info-dialog" 
-      class={"" <> " " <> @class}
+      class={
+        "border px-2 center-content border-surface/60 rounded text-subtle"
+        <> " bg-surface/60 hover:bg-surface"
+        <> " hover:text-foreground cursor-pointer"
+        <> " dark:bg-transparent dark:hover:bg-surface/60"
+        <> " " <> @class
+      }
       phx-click={show_modal()}>
-      <.icon name="hero-information-circle" />
+      <span class="hero-information-circle-solid size-4" />
       <.modal id="info-modal">
         This is a modal.
       </.modal>

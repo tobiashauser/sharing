@@ -37,15 +37,19 @@ defmodule SharingWeb.Index do
   ### Action Button ---------------------------------------
 
   def handle_event("show-input", _params, socket) do
-    {:noreply, socket |> ActionButton.show_input()}
+    {:noreply, socket |> push_event("show-input", %{})}
   end
 
   def handle_event("show-button", _params, socket) do
-    {:noreply, socket |> ActionButton.show_button()}
+    {:noreply, socket |> push_event("show-button", %{})}
   end
 
   def handle_event("show-code", _params, socket) do
-    {:noreply, socket |> ActionButton.show_code()}
+    {:noreply, socket |> push_event("show-code", %{})}
+  end
+
+  def handle_event("submit-code", %{"code" => code}, socket) do
+    {:noreply, socket}
   end
 
   ### File Uploads ----------------------------------------
@@ -79,7 +83,7 @@ defmodule SharingWeb.Index do
   end
 
   def handle_event("open-file-picker", _params, socket) do
-    {:noreply, socket |> push_event("click", %{ref: socket.assigns.uploads.files.ref})}
+    {:noreply, socket |> push_event("click", %{id: socket.assigns.uploads.files.ref})}
   end
 
   ### --------------------------------------------------------------------- ###
@@ -105,8 +109,8 @@ defmodule SharingWeb.Index do
     ~H"""
     <div class="flex flex-col gap-6">
       <div class="flex justify-between">
-        <ActionButton.render class="border-2" />
-        <Info.render class="border-2"/>
+        <ActionButton.render />
+        <Info.render />
       </div>
       <form
         phx-submit="upload"

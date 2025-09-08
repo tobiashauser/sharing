@@ -26,15 +26,24 @@ import {hooks as colocatedHooks} from "phoenix-colocated/sharing"
 import topbar from "../vendor/topbar"
 
 import "./click"
-import "./gsap"
+import GsapEvents from "./gsap"
 import WindowDragEvents from "./drag-and-drop"
 import MouseEvents from "./mouse-events"
+import KeyEvents from "./key-events"
+import ActionButtonEvents from "./action-button-events"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks, WindowDragEvents, MouseEvents},
+  hooks: {
+    ...colocatedHooks,
+    WindowDragEvents,
+    MouseEvents,
+    GsapEvents,
+    KeyEvents,
+    ActionButtonEvents
+  },
 })
 
 // Show progress bar on live navigation and form submits

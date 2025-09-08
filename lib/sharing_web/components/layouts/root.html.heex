@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="light dark" />
     <.live_title default="Sharing" suffix="">
       {assigns[:page_title]}
     </.live_title>
@@ -12,7 +12,7 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
   </head>
-  <body id="root" phx-hook="WindowDragEvents">
+  <body id="window-drag-events" phx-hook="WindowDragEvents">
     {@inner_content}
   </body>
 </html>
