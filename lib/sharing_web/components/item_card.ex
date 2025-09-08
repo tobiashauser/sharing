@@ -42,11 +42,30 @@ defmodule SharingWeb.ItemCard do
 
   attr(:class, :string, default: "")
   attr(:item, :map)
+  attr(:size, :string, default: "size-5")
 
-  def symbol(%{item: %{file: %{client_type: "text/plain"}}} = assigns) do
+  def symbol(%{item: %{file: %{client_type: type}}} = assigns)
+      when type == "text/csv" or type == "text/tsv" do
     ~H"""
     <div class={@class}>
-      <span class="hero-folder-solid size-5" />
+      <span class={"hero-document-text-solid " <> @size} />
+    </div>
+    """
+  end
+
+  def symbol(%{item: %{file: %{client_type: type}}} = assigns)
+      when type == "text/plain" do
+    ~H"""
+    <div class={@class}>
+      <span class={"hero-document-text-solid " <> @size} />
+    </div>
+    """
+  end
+
+  def symbol(%{item: %{file: _}} = assigns) do
+    ~H"""
+    <div class={@class}>
+      <span class={"hero-document-solid " <> @size} />
     </div>
     """
   end
@@ -54,7 +73,7 @@ defmodule SharingWeb.ItemCard do
   def symbol(%{item: %{folder: _}} = assigns) do
     ~H"""
     <div class={@class}>
-      <span class="hero-folder-solid size-5" />
+      <span class={"hero-folder-solid " <> @size} />
     </div>
     """
   end
@@ -62,7 +81,7 @@ defmodule SharingWeb.ItemCard do
   def symbol(assigns) do
     ~H"""
     <div class={@class}>
-      <span class="hero-document-solid size-5" />
+      <span class={"hero-x-circle " <> @size} />
     </div>
     """
   end
@@ -73,8 +92,6 @@ defmodule SharingWeb.ItemCard do
   attr(:item, :map)
 
   def cancel(%{item: %{file: _}} = assigns) do
-    dbg(assigns)
-
     ~H"""
     <span
       class={@class}
@@ -85,8 +102,6 @@ defmodule SharingWeb.ItemCard do
   end
 
   def cancel(%{item: %{folder: _}} = assigns) do
-    dbg(assigns)
-
     ~H"""
     <span
       class={@class}
