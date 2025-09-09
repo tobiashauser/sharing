@@ -24,6 +24,20 @@ defmodule SharingWeb.Index do
   ### Actions                                                               ###
   ### --------------------------------------------------------------------- ###
 
+  defp patch_client_directory_paths(socket) do
+    update_in(
+      socket.assigns.uploads.files.entries,
+      &Enum.map(&1, fn entry ->
+        if Map.has_key?(socket.assigns.directories, entry.ref) do
+          %{entry | client_relative_path: Map.get(socket.assigns.directories, entry.ref)}
+        else
+          entry
+        end
+      end)
+    )
+    |> assign(:directories, %{})
+  end
+
   defp push_file_ids(socket) do
     ids =
       socket.assigns.uploads.files.entries
@@ -31,6 +45,8 @@ defmodule SharingWeb.Index do
       # `drag-and-drop.js`.
       |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
 
+    dbg(ids)
+    dbg(socket.assigns.uploads.files.entries)
     socket |> push_event("file-ids", %{ids: ids})
   end
 
@@ -48,14 +64,25 @@ defmodule SharingWeb.Index do
     {:noreply, socket |> push_event("show-code", %{})}
   end
 
-  def handle_event("submit-code", %{"code" => code}, socket) do
+  def handle_event("submit-code", %{"code" => _}, socket) do
     {:noreply, socket}
   end
 
   ### File Uploads ----------------------------------------
 
+  # Run immediatly before validate.
+  def handle_event("directories", params, socket) do
+    dbg(params)
+    {:noreply, socket |> assign(:directories, params)}
+  end
+
   def handle_event("validate", _params, socket) do
-    {:noreply, socket |> push_file_ids()}
+    {
+      :noreply,
+      socket
+      |> patch_client_directory_paths()
+      |> push_file_ids()
+    }
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
@@ -107,25 +134,27 @@ defmodule SharingWeb.Index do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col gap-6">
-      <div class="flex justify-between">
-        <ActionButton.render />
-        <Info.render />
-      </div>
-      <form
-        phx-submit="upload"
-        phx-change="validate">
-        <.drop_area/>
-        <.live_file_input
-          class="sr-only"
-          upload={@uploads.files}
-        />
-      </form>
-      <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <ItemCard.render
-          :for={item <- ItemCard.normalize(@uploads.files)}
-          item={item}
-        />
+    <div id="window-drag-events" phx-hook="WindowDragEvents">
+      <div class="flex flex-col gap-6">
+        <div class="flex justify-between">
+          <ActionButton.render />
+          <Info.render />
+        </div>
+        <form
+          phx-submit="upload"
+          phx-change="validate">
+          <.drop_area/>
+          <.live_file_input
+            class="sr-only"
+            upload={@uploads.files}
+          />
+        </form>
+        <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ItemCard.render
+            :for={item <- ItemCard.normalize(@uploads.files)}
+            item={item}
+          />
+        </div>
       </div>
     </div>
     """

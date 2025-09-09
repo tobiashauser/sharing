@@ -5,7 +5,12 @@
 // https://hexdocs.pm/phoenix_live_view/js-interop.html#client-hooks-via-phx-hook
 
 function readFileEntry(entry) {
-  return new Promise((resolve, reject) => entry.file(resolve, reject))
+  return new Promise((resolve, reject) => {
+    entry.file(file => {
+      resolve([ref, file])
+      ref += 1
+    }, reject)
+  })
 }
 
 async function readDirectoryEntry(dirEntry) {
@@ -29,13 +34,18 @@ async function readDirectoryEntry(dirEntry) {
       })();
     });
 
-  async function walk(entry) {
+  async function walk(entry, path = "") {
     if (entry.isFile) {
-      const file = await readFileEntry(entry);
-      result.push(file);
+      const [ref, file] = await readFileEntry(entry);
+      // Only push to the result if an id for the file doesn't exist
+      // yet. 
+      if (!fileIds.includes(fileId(file.name, path))) {
+        result.push([ref, path, file]);
+        console.log("==>", ref, path, file)
+      }
     } else if (entry.isDirectory) {
       const entries = await readAll(entry.createReader());
-      await Promise.all(entries.map(walk));
+      await Promise.all(entries.map(e => walk(e, e.fullPath)));
     }
   }
 
@@ -43,14 +53,17 @@ async function readDirectoryEntry(dirEntry) {
   return result;
 }
 
-function fileId(file) {
-  return file.name + ":" + file.webkitRelativePath
+function fileId(prefix, suffix = "") {
+  return prefix + ":" + suffix
 }
 
 // Keep track of a little internal state to work around the event
 // triggers for every element.
 let state = 0
 let fileIds = []
+
+// Keep count of the current ref.
+let ref = 0
 
 // Add this object to the livesocket configuration:
 //
@@ -98,18 +111,26 @@ export default WindowDragEvents = {
         const entry = entries[i].getAsEntry ? entries[i].getAsEntry() : entries[i].webkitGetAsEntry();
         if (entry instanceof FileSystemFileEntry) {
 	  readFileEntry(entry)
-	    .then(file => {
-	      if (!fileIds.includes(fileId(file))) {
+	    .then(([_, file]) => {
+              // This check is uncomplicated since we can only assume
+              // that we are at the top level and have no nesting.
+	      if (!fileIds.includes(fileId(file.name))) {
+                // Inject the file into the socket.
 		this.upload("files", [file])
 	      }
 	    })
         } else {
 	  readDirectoryEntry(entry)
 	    .then(files => {
-	      this.upload(
-		"files",
-		files.filter(file => !fileIds.includes(fileId(file)))
-	      )
+              const paths = files.reduce((acc, [ref, path, _]) => {
+                acc.set(String(ref), path)
+                return acc
+              }, new Map())
+              console.log("==>", paths)
+              this.pushEvent("directories", Object.fromEntries(paths))
+              // Inject the files into the socket. This will call
+              // "validate" on the server.
+              this.upload("files", files.map(([ref, path, file]) => file))
 	    })
 	}
       }
@@ -126,6 +147,7 @@ export default WindowDragEvents = {
     // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
       fileIds = event.detail.ids
+      console.log("fileIds", fileIds)
     };
 
     window.addEventListener("dragenter", this.handleDragEnter);
