@@ -40,6 +40,13 @@ defmodule SharingWeb.ItemCard do
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
+  defp format_bytes(bytes) when is_integer(bytes) do
+    bytes
+    |> FileSize.new(:b)
+    |> FileSize.scale()
+    |> FileSize.Formatter.format(precision: 1)
+  end
+
   ### Symbol ----------------------------------------------
 
   attr(:class, :string, default: "")
@@ -88,6 +95,22 @@ defmodule SharingWeb.ItemCard do
     """
   end
 
+  ### Info ------------------------------------------------
+
+  attr(:item, :map)
+
+  def info(%{item: %{file: _}} = assigns) do
+    ~H"""
+    {format_bytes(@item.file.client_size)}
+    """
+  end
+
+  def info(%{item: %{folder: _}} = assigns) do
+    ~H"""
+    {@item.size} items
+    """
+  end
+
   ### Cancel Button ---------------------------------------
 
   attr(:class, :string, default: "")
@@ -126,9 +149,11 @@ defmodule SharingWeb.ItemCard do
     <div class= "flex items-center gap-2 p-2 rounded border-1 border-surface">
       <.symbol class="center-content p-2 rounded bg-elevated" item={@item} />
       <div class="flex justify-between items-center w-full overflow-hidden">
-        <div class="flex flex-col min-w-0 mr-2">
+        <div class="flex flex-col min-w-0 mr-2 gap-0.5">
           <div class="text-sm font-medium truncate">{@title}</div>
-          <div class="text-subtle text-xs">Info</div>
+          <div class="text-subtle text-xs">
+            <.info item={@item} />
+          </div>
         </div>
         <.cancel
           class="border hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70"
