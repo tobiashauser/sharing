@@ -93,20 +93,24 @@ defmodule SharingWeb.ItemCard do
 
   def cancel(%{item: %{file: _}} = assigns) do
     ~H"""
-    <span
-      class={@class}
-      phx-click="cancel-upload"
-      phx-value-ref={@item.file.ref}
-    />
+    <div>
+      <span
+        class={@class}
+        phx-click="cancel-upload"
+        phx-value-ref={@item.file.ref}
+      />
+    </div>
     """
   end
 
   def cancel(%{item: %{folder: _}} = assigns) do
     ~H"""
-    <span
-      class={@class}
-      phx-click={JS.push("cancel-upload", value: %{refs: @item.refs})}
-    />
+    <div>
+      <span
+        class={@class}
+        phx-click={JS.push("cancel-upload", value: %{refs: @item.refs})}
+      />
+    </div>
     """
   end
 
@@ -119,13 +123,13 @@ defmodule SharingWeb.ItemCard do
     ~H"""
     <div class= "flex items-center gap-2 p-2 rounded border-1 border-surface">
       <.symbol class="center-content p-2 rounded bg-elevated" item={@item} />
-      <div class="flex justify-between items-center w-full">
-        <div class="flex flex-col">
-          <div class="text-sm font-medium">{@title}</div>
+      <div class="flex justify-between items-center w-full overflow-hidden">
+        <div class="flex flex-col min-w-0 mr-2">
+          <div class="text-sm font-medium truncate">{@title}</div>
           <div class="text-subtle text-xs">Info</div>
         </div>
         <.cancel
-          class="hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70"
+          class="border hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70"
           item={@item}
         />
       </div>
