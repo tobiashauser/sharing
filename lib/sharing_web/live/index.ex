@@ -29,9 +29,33 @@ defmodule SharingWeb.Index do
       socket.assigns.uploads.files.entries
       # The schema by which the fileIds are created must be kept in sync with
       # `drag-and-drop.js`.
-      |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
+      # |> Enum.map(&(&1.client_name <> ":" <> &1.client_relative_path))
+      |> Enum.map(fn entry ->
+        if entry.client_relative_path == "",
+          do: entry.client_name,
+          else: entry.client_relative_path
+      end)
 
     socket |> push_event("file-ids", %{ids: ids})
+  end
+
+  defp dbg_entries(socket) do
+    dbg(socket.assigns.uploads.files.entries)
+    socket
+  end
+
+  defp update_client_relative_paths(socket, directories) do
+    update(socket, :uploads, fn uploads ->
+      put_in(
+        uploads.files.entries,
+        Enum.map(uploads.files.entries, fn entry ->
+          if dir = Map.get(directories, entry.ref),
+            do: %{entry | client_relative_path: dir},
+            else: entry
+        end)
+      )
+    end)
+    |> dbg_entries()
   end
 
   ### Action Button ---------------------------------------
@@ -54,8 +78,12 @@ defmodule SharingWeb.Index do
 
   ### File Uploads ----------------------------------------
 
+  def handle_event("directories", params, socket) do
+    {:noreply, socket |> update_client_relative_paths(params)}
+  end
+
   def handle_event("validate", _params, socket) do
-    {:noreply, socket |> push_file_ids()}
+    {:noreply, socket}
   end
 
   def handle_event("cancel-upload", %{"ref" => ref}, socket) do
@@ -74,12 +102,6 @@ defmodule SharingWeb.Index do
   def handle_event("upload", _params, socket) do
     uploaded_files = []
     {:noreply, socket |> update(:uploaded_files, &(&1 ++ uploaded_files))}
-  end
-
-  ### Drag and Drop ---------------------------------------
-
-  def handle_event("drop", _params, socket) do
-    {:noreply, socket |> assign(:dragging, false)}
   end
 
   def handle_event("open-file-picker", _params, socket) do
@@ -107,6 +129,7 @@ defmodule SharingWeb.Index do
 
   def render(assigns) do
     ~H"""
+    <div id="window-drag-events" phx-hook="WindowDragEvents">
     <div class="flex flex-col gap-6">
       <div class="flex justify-between">
         <ActionButton.render />
@@ -128,6 +151,7 @@ defmodule SharingWeb.Index do
         />
       </div>
     </div>
+      </div>
     """
   end
 end

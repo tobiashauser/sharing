@@ -19,7 +19,9 @@ defmodule SharingWeb.ItemCard do
 
         %{client_relative_path: folder} ->
           folder_name =
-            String.split(folder, "/", parts: 2)
+            folder
+            |> String.trim_leading("/")
+            |> String.split("/", parts: 2)
             |> List.first()
 
           case acc do

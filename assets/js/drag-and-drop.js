@@ -4,8 +4,13 @@
 // scope) see:
 // https://hexdocs.pm/phoenix_live_view/js-interop.html#client-hooks-via-phx-hook
 
-function readFileEntry(entry) {
-  return new Promise((resolve, reject) => entry.file(resolve, reject))
+function readFileEntry(entry, path) {
+  return new Promise((resolve, reject) => {
+    entry.file(
+      file => resolve([file, path]),
+      reject
+    )
+  })
 }
 
 async function readDirectoryEntry(dirEntry) {
@@ -29,13 +34,13 @@ async function readDirectoryEntry(dirEntry) {
       })();
     });
 
-  async function walk(entry) {
+  async function walk(entry, path) {
     if (entry.isFile) {
-      const file = await readFileEntry(entry);
+      const file = await readFileEntry(entry, path);
       result.push(file);
     } else if (entry.isDirectory) {
       const entries = await readAll(entry.createReader());
-      await Promise.all(entries.map(walk));
+      await Promise.all(entries.map(e => walk(e, e.fullPath)));
     }
   }
 
@@ -43,14 +48,11 @@ async function readDirectoryEntry(dirEntry) {
   return result;
 }
 
-function fileId(file) {
-  return file.name + ":" + file.webkitRelativePath
-}
-
 // Keep track of a little internal state to work around the event
 // triggers for every element.
 let state = 0
-let fileIds = []
+let uploadedFiles = []
+let ref = 0
 
 // Add this object to the livesocket configuration:
 //
@@ -96,22 +98,44 @@ export default WindowDragEvents = {
       const entries = event.dataTransfer.items;
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i].getAsEntry ? entries[i].getAsEntry() : entries[i].webkitGetAsEntry();
+
+        // Handle a single dropped file.
         if (entry instanceof FileSystemFileEntry) {
-	  readFileEntry(entry)
-	    .then(file => {
-	      if (!fileIds.includes(fileId(file))) {
+	  readFileEntry(entry, "")
+	    .then(([file, _]) => {
+              if (!uploadedFiles.includes(file.name)) {
 		this.upload("files", [file])
+                ++ref;
+                uploadedFiles.push(file.name)
 	      }
 	    })
-        } else {
+        }
+
+        // Handle a dropped directory.
+        else {
 	  readDirectoryEntry(entry)
 	    .then(files => {
-	      this.upload(
-		"files",
-		files.filter(file => !fileIds.includes(fileId(file)))
-	      )
-	    })
-	}
+              let filesAndRef = files
+                .filter(([_ , path]) => !uploadedFiles.includes(path))
+                .map(([file, path]) => {
+                  ++ref;
+                  uploadedFiles.push(path)
+                  return [file, path, ref - 1]
+                })
+
+              const filteredFiles = filesAndRef
+                .map(([file, path, ref]) => file)
+              this.upload("files", filteredFiles)
+
+              // Send the paths to the server. This must be called AFTER `upload'!
+              const directories = filesAndRef
+                .reduce((acc, [_, path, ref]) => {
+                  acc.set(ref, path)
+                  return acc
+                }, new Map())
+             this.pushEvent("directories", Object.fromEntries(directories))
+            })
+        }
       }
     };
 
@@ -125,7 +149,8 @@ export default WindowDragEvents = {
     //
     // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
-      fileIds = event.detail.ids
+      uploadedFiles = event.detail.ids
+      console.log(uploadedFiles)
     };
 
     window.addEventListener("dragenter", this.handleDragEnter);
