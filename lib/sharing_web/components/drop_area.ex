@@ -13,21 +13,42 @@ defmodule SharingWeb.DropArea do
   """
   use SharingWeb, :html
 
+  attr(:class, :string, default: "")
+  attr(:icon, :string, default: "hero-arrow-up-tray-mini")
+  attr(:active, :boolean, default: true)
+
+  def button(assigns) do
+    ~H"""
+    <div>
+      <button
+        type="submit"
+        class={@class <> " not-uploads:sr-only"}>
+        <span class={@icon} />
+      </button>
+      <div class={@class <> " uploads:sr-only"}>
+        <span class={@icon} />
+      </div>
+    </div>
+    """
+  end
+
+  attr(:active, :boolean, default: false)
+
   def content(assigns) do
     ~H"""
-    <div class={
-      "p-3 mb-3 center-content transition"
-      <> " border-2 border-subtle/40 rounded-full"
-      <> " dragging:border-salient dragging:bg-salient/20"
-      }>
-      <span
-        class={
-          "size-5 text-subtle/70 dragging:text-salient"
-          <> " hero-arrow-up-tray-mini"
-          <> " dragging:hero-arrow-down-tray-mini"
-        }
-      />
-    </div>
+    <.button
+      active={@active}
+      class={
+        "p-3 mb-3 center-content transition cursor-pointer"
+        <> " border-2 border-subtle/40 rounded-full"
+        <> " dragging:border-salient dragging:bg-salient/20"
+        <> " uploads:border-popout uploads:bg-popout/20 uploads:shadow"}
+      icon={
+        "size-5 text-subtle/70 dragging:text-salient transition"
+        <> " hero-arrow-up-tray-mini"
+        <> " dragging:hero-arrow-down-tray-mini"
+        <> " uploads:text-popout"}
+    />
     <p class="text-sm mb-1.5 font-medium">Upload files</p>
     <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
     """
@@ -40,7 +61,7 @@ defmodule SharingWeb.DropArea do
     <div
       id="drop-area"
       phx-hook="MouseEvents"
-      class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class}>
+      class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class} >
       <div class={
         "m-4 center-content transition" 
         <> " border-2 border-transparent rounded-[9px] border-dashed"

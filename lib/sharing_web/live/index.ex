@@ -100,6 +100,7 @@ defmodule SharingWeb.Index do
   end
 
   def handle_event("upload", _params, socket) do
+    dbg(socket)
     uploaded_files = []
     {:noreply, socket |> update(:uploaded_files, &(&1 ++ uploaded_files))}
   end
@@ -130,30 +131,32 @@ defmodule SharingWeb.Index do
   def render(assigns) do
     ~H"""
     <div id="window-drag-events" phx-hook="WindowDragEvents">
-    <div class="flex flex-col gap-6">
-      <div class="flex justify-between">
-        <ActionButton.render />
-        <Info.render />
-      </div>
-      <form
-        phx-submit="upload"
-        phx-change="validate">
-        <label for={@uploads.files.ref}>
-          <.drop_area />
-        </label>
-        <.live_file_input
-          class="sr-only"
-          upload={@uploads.files}
-        />
-      </form>
-      <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <ItemCard.render
-          :for={item <- ItemCard.normalize(@uploads.files)}
-          item={item}
-        />
+      <div data-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
+        <div class="flex flex-col gap-6">
+          <div class="flex justify-between">
+            <ActionButton.render />
+            <Info.render />
+          </div>
+          <form
+            phx-submit="upload"
+            phx-change="validate">
+            <label for={@uploads.files.ref}>
+              <.drop_area active={!Enum.empty?(@uploads.files.entries)} />
+            </label>
+            <.live_file_input
+              class="sr-only"
+              upload={@uploads.files}
+            />
+          </form>
+          <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <ItemCard.render
+              :for={item <- ItemCard.normalize(@uploads.files)}
+              item={item}
+            />
+          </div>
+        </div>
       </div>
     </div>
-      </div>
     """
   end
 end
