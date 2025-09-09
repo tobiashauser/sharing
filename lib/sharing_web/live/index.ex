@@ -138,7 +138,9 @@ defmodule SharingWeb.Index do
       <form
         phx-submit="upload"
         phx-change="validate">
-        <.drop_area/>
+        <label for={@uploads.files.ref}>
+          <.drop_area />
+        </label>
         <.live_file_input
           class="sr-only"
           upload={@uploads.files}

@@ -2,6 +2,10 @@
 
 window.addEventListener("phx:click", (e) => {
   const target = document.getElementById(e.detail.id)
+  console.log("Clicking =>", target)
+  // target.click()
+  const click = new Event("click")
+  target.dispatchEvent(click)
   target.click()
 })
 

@@ -29,7 +29,7 @@ defmodule SharingWeb.DropArea do
       />
     </div>
     <p class="text-sm mb-1.5 font-medium">Upload files</p>
-    <p class="text-subtle text-xs">Drag & Drop or click to browser</p>
+    <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
     """
   end
 
@@ -40,8 +40,7 @@ defmodule SharingWeb.DropArea do
     <div
       id="drop-area"
       phx-hook="MouseEvents"
-      class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class}
-      phx-click="open-file-picker">
+      class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class}>
       <div class={
         "m-4 center-content transition" 
         <> " border-2 border-transparent rounded-[9px] border-dashed"
