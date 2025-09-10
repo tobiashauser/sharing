@@ -36,25 +36,21 @@ export default ActionButtonEvents = {
     const showInput = new Scene()
       .onStart(() => {
         inputContent.element.value = ""
-        button.element.classList.add("dark:pointer-events-none")
-        if (dark()) {
-          button.element.classList.add("dark:bg-surface/60")
-        }
+        button.element.classList.add("pointer-events-none")
+        button.element.classList.add("dark:bg-surface/60")
       })
       .stage("remove", [buttonContent.to(hide), download.to(show)])
       .stage("resize", [input.to(expand), button.to(contract), download.to(expand)])
       .stage("insert", [inputContent.to(show), downloadContent.to(show)])
       .onComplete(() => {
         inputContent.element.focus()
-        button.element.classList.remove("dark:pointer-events-none")
+        button.element.classList.remove("pointer-events-none")
       })
 
     const showButton = new Scene()
       .onStart(() => {
-        button.element.classList.add("dark:pointer-events-none")
-        if (dark()) {
-          button.element.classList.remove("dark:bg-surface/60")
-        }
+        button.element.classList.add("pointer-events-none")
+        button.element.classList.remove("dark:bg-surface/60")
       })
       .stage("remove", [
         inputContent.to(hide),
@@ -71,17 +67,25 @@ export default ActionButtonEvents = {
       ])
       .stage("show", [buttonContent.to(show)])
       .onComplete(() => {
-        button.element.classList.remove("dark:pointer-events-none")
+        button.element.classList.remove("pointer-events-none")
       })
 
     const showCode = new Scene()
+      .onStart(() => {
+        inputContent.element.value = ""
+        button.element.classList.add("pointer-events-none")
+        button.element.classList.add("dark:bg-surface/60")
+      })
       .stage("remove", [buttonContent.to(hide), inputContent.to(hide)])
       .stage("resize", [
         button.to(contract),
-        codeLabel.to(contract),
-        code.to(contract),
+        codeLabel.to(expand),
+        code.to(expand),
       ])
-      .stage("insert", [codeLabelContent.to(show), codeContent.to(show)]);
+      .stage("insert", [codeLabelContent.to(show), codeContent.to(show)])
+      .onComplete(() => {
+        button.element.classList.remove("pointer-events-none")
+      })
 
     this.handleShowInput = (_) => {
       showInput.animate()

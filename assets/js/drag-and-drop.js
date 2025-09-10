@@ -53,6 +53,7 @@ async function readDirectoryEntry(dirEntry) {
 let state = 0
 let uploadedFiles = []
 let ref = 0
+let disabled = false
 
 // Add this object to the livesocket configuration:
 //
@@ -65,6 +66,7 @@ export default WindowDragEvents = {
     this.handleDragEnter = (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (disabled) return;
       state++;
 
       if (state == 1) {
@@ -75,6 +77,7 @@ export default WindowDragEvents = {
     this.handleDragLeave = (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (disabled) return;
       state--;
 
       if (state == 0) {
@@ -90,6 +93,7 @@ export default WindowDragEvents = {
     this.handleDrop = (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (disabled) return;
       
       // The drag event has ended.
       this.el.setAttribute("data-dragging", "false");
@@ -153,11 +157,16 @@ export default WindowDragEvents = {
       console.log(uploadedFiles)
     };
 
+    this.handleCloseUploads = (e) => {
+      disabled = e.detail.val
+    };
+
     window.addEventListener("dragenter", this.handleDragEnter);
     window.addEventListener("dragleave", this.handleDragLeave);
     window.addEventListener("dragover", this.handleDragOver);
     window.addEventListener("drop", this.handleDrop);
     window.addEventListener("phx:file-ids", this.handleFileIds);
+    window.addEventListener("phx:close-uploads", this.handleCloseUploads);
   },
 
   destroyed() {
@@ -166,5 +175,6 @@ export default WindowDragEvents = {
     window.removeEventListener("dragover", this.handleDragOver);
     window.removeEventListener("drop", this.handleDrop);
     window.removeEventListener("phx:file-ids", this.handleFileIds);
+    window.removeEventListener("phx:close-uploads", this.handleCloseUploads);
   }
 };

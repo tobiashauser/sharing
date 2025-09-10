@@ -50,7 +50,7 @@ defmodule SharingWeb.ActionButton do
     <button
       id="ab-enter-code"
       class={"center-content " <> @class}
-      phx-click="show-input">
+      phx-click="show-code">
       <span
         id="ab-enter-code-content"
         class={@contentClass}>
@@ -79,7 +79,7 @@ defmodule SharingWeb.ActionButton do
 
   attr(:class, :string, default: "")
   attr(:contentClass, :string, default: "")
-  attr(:generatedCode, :string, required: true)
+  attr(:code, :string, required: true)
 
   defp action_button_code(assigns) do
     ~H"""
@@ -89,14 +89,14 @@ defmodule SharingWeb.ActionButton do
       <span
         id="ab-code-content"
         class={@contentClass}>
-        {@generatedCode}
+        {@code}
       </span>
     </div>
     """
   end
 
   attr(:class, :string, default: "")
-  attr(:generatedCode, :string, default: "No code provided")
+  attr(:code, :string, default: "No code provided")
 
   def render(assigns) do
     ~H"""
@@ -127,12 +127,12 @@ defmodule SharingWeb.ActionButton do
         />
         <.action_button_code_label
           class="bg-surface/60 w-0"
-          contentClass="invisible opacity-0 focus:outline-none px-2"
+          contentClass="invisible opacity-0 focus:outline-none px-2 font-normal text-foreground/80"
         />
         <.action_button_code
           class="w-0"
-          contentClass="invisible opacity-0 focus:outline-none px-2"
-          generatedCode={@generatedCode}
+          contentClass="invisible opacity-0 focus:outline-none px-2 text-popout"
+          code={@code}
         />
       </div>
     </div>

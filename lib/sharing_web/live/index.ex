@@ -10,6 +10,8 @@ defmodule SharingWeb.Index do
     {
       :ok,
       socket
+      |> assign(:shared, false)
+      |> assign(:petname, petname())
       |> assign(:uploaded_files, [])
       |> allow_upload(
         :files,
@@ -57,6 +59,13 @@ defmodule SharingWeb.Index do
     end)
   end
 
+  defp petname() do
+    {petname, 0} = System.cmd("petname", [])
+
+    petname
+    |> String.trim_trailing("\n")
+  end
+
   ### Action Button ---------------------------------------
 
   def handle_event("show-input", _params, socket) do
@@ -76,6 +85,10 @@ defmodule SharingWeb.Index do
   end
 
   ### File Uploads ----------------------------------------
+
+  def handle_event("open-file-picker", _params, socket) do
+    {:noreply, socket |> push_event("click", %{id: socket.assigns.uploads.files.ref})}
+  end
 
   def handle_event("directories", params, socket) do
     {:noreply, socket |> update_client_relative_paths(params)}
@@ -98,14 +111,21 @@ defmodule SharingWeb.Index do
     {:noreply, socket |> push_file_ids()}
   end
 
+  ### Save Uploads ----------------------------------------
+
   def handle_event("upload", _params, socket) do
     dbg(socket)
     uploaded_files = []
-    {:noreply, socket |> update(:uploaded_files, &(&1 ++ uploaded_files))}
-  end
 
-  def handle_event("open-file-picker", _params, socket) do
-    {:noreply, socket |> push_event("click", %{id: socket.assigns.uploads.files.ref})}
+    {
+      :noreply,
+      socket
+      |> assign(:shared, true)
+      |> update(:uploaded_files, &(&1 ++ uploaded_files))
+      |> push_event("show-code", %{})
+      |> push_event("close-uploads", %{val: true})
+      |> push_event("disable-mouse-events", %{val: true})
+    }
   end
 
   ### --------------------------------------------------------------------- ###
@@ -138,7 +158,7 @@ defmodule SharingWeb.Index do
       <div data-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
         <div class="flex flex-col gap-6">
           <div class="flex justify-between">
-            <ActionButton.render />
+            <ActionButton.render code={@petname} />
             <Info.render />
           </div>
           <form
@@ -146,6 +166,7 @@ defmodule SharingWeb.Index do
             phx-change="validate">
             <.drop_area input={@uploads.files.ref} />
             <.live_file_input
+              disabled={@shared}
               class="sr-only"
               upload={@uploads.files}
             />

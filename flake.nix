@@ -19,6 +19,10 @@
             erlang-ls
           ] ++ [
             nodejs_24
+
+            # Manually bundle with application
+            rust-petname
+            qrrs
           ];
 
           # E.g. install phx with `mix archive.install hex phx_new'.
