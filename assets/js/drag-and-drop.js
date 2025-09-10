@@ -100,7 +100,7 @@ export default WindowDragEvents = {
         const entry = entries[i].getAsEntry ? entries[i].getAsEntry() : entries[i].webkitGetAsEntry();
 
         // Handle a single dropped file.
-        if (entry instanceof FileSystemFileEntry) {
+        if (entry.isFile) {
 	  readFileEntry(entry, "")
 	    .then(([file, _]) => {
               if (!uploadedFiles.includes(file.name)) {
@@ -112,7 +112,7 @@ export default WindowDragEvents = {
         }
 
         // Handle a dropped directory.
-        else {
+        else if (entry.isDirectory) {
 	  readDirectoryEntry(entry)
 	    .then(files => {
               let filesAndRef = files
