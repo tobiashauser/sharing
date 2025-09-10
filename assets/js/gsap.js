@@ -1,10 +1,11 @@
 // A small wrapper around gsap that triggers animations initiated by
 // the server.
 import gsap from "../vendor/gsap";
+import { log } from "./state";
 
 export default GsapEvents = {
   mounted () {
-    console.log("Listening to gsap events")
+     log("Listening to gsap events")
     
     this.handleGsapTo = (e) => {
       gsap.to(e.detail.targets, e.detail.vars)

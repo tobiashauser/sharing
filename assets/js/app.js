@@ -26,11 +26,12 @@ import {hooks as colocatedHooks} from "phoenix-colocated/sharing"
 import topbar from "../vendor/topbar"
 
 import "./click"
-import GsapEvents from "./gsap"
-import WindowDragEvents from "./drag-and-drop"
-import MouseEvents from "./mouse-events"
-import KeyEvents from "./key-events"
 import ActionButtonEvents from "./action-button-events"
+import GsapEvents from "./gsap"
+import KeyEvents from "./key-events"
+import MouseEvents from "./mouse-events"
+import WindowDragEvents from "./drag-and-drop"
+import { StateEvents } from "./state"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
@@ -38,11 +39,12 @@ const liveSocket = new LiveSocket("/live", Socket, {
   params: {_csrf_token: csrfToken},
   hooks: {
     ...colocatedHooks,
-    WindowDragEvents,
-    MouseEvents,
+    ActionButtonEvents,
     GsapEvents,
     KeyEvents,
-    ActionButtonEvents
+    MouseEvents,
+    StateEvents,
+    WindowDragEvents,
   },
 })
 

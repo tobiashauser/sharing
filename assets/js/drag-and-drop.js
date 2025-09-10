@@ -4,6 +4,8 @@
 // scope) see:
 // https://hexdocs.pm/phoenix_live_view/js-interop.html#client-hooks-via-phx-hook
 
+import { state, log } from "./state"
+
 function readFileEntry(entry, path) {
   return new Promise((resolve, reject) => {
     entry.file(
@@ -50,38 +52,39 @@ async function readDirectoryEntry(dirEntry) {
 
 // Keep track of a little internal state to work around the event
 // triggers for every element.
-let state = 0
+let dragsStack = 0
 let uploadedFiles = []
 let ref = 0
-let disabled = false
 
 // Add this object to the livesocket configuration:
 //
 //    new LiveSocket(hooks: { ..., WindowDragEvents })
 export default WindowDragEvents = {
   mounted() {
-    console.log("Mounted window drag events")
-    state = 0;
+    log("Listening to window drag events")
+    dragsStack = 0;
     
     this.handleDragEnter = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (disabled) return;
-      state++;
+      if (state.allowUploads) return;
+      dragsStack++;
 
-      if (state == 1) {
+      if (dragsStack == 1) {
         this.el.setAttribute("data-dragging", true);
+        log("dragenter", "#"+this.el.id)
       }
     };
 
     this.handleDragLeave = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (disabled) return;
-      state--;
+      if (state.allowUploads) return;
+      dragsStack--;
 
-      if (state == 0) {
+      if (dragsStack == 0) {
         this.el.setAttribute("data-dragging", "false");
+        log("dragleave", "#"+this.el.id)
       };
     };
 
@@ -93,11 +96,12 @@ export default WindowDragEvents = {
     this.handleDrop = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (disabled) return;
+      if (state.allowUploads) return;
+      log("drop", "#"+this.el.id)
       
       // The drag event has ended.
       this.el.setAttribute("data-dragging", "false");
-      state = 0;
+      drags= 0;
 
       const entries = event.dataTransfer.items;
       for (let i = 0; i < entries.length; i++) {
@@ -154,11 +158,7 @@ export default WindowDragEvents = {
     // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
       uploadedFiles = event.detail.ids
-      console.log(uploadedFiles)
-    };
-
-    this.handleCloseUploads = (e) => {
-      disabled = e.detail.val
+      log(uploadedFiles)
     };
 
     window.addEventListener("dragenter", this.handleDragEnter);
@@ -166,7 +166,6 @@ export default WindowDragEvents = {
     window.addEventListener("dragover", this.handleDragOver);
     window.addEventListener("drop", this.handleDrop);
     window.addEventListener("phx:file-ids", this.handleFileIds);
-    window.addEventListener("phx:close-uploads", this.handleCloseUploads);
   },
 
   destroyed() {
@@ -175,6 +174,5 @@ export default WindowDragEvents = {
     window.removeEventListener("dragover", this.handleDragOver);
     window.removeEventListener("drop", this.handleDrop);
     window.removeEventListener("phx:file-ids", this.handleFileIds);
-    window.removeEventListener("phx:close-uploads", this.handleCloseUploads);
   }
 };

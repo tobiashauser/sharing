@@ -49,6 +49,7 @@ defmodule SharingWeb do
   def live_view do
     quote do
       use Phoenix.LiveView
+      alias SharingWeb.State
 
       unquote(html_helpers())
     end

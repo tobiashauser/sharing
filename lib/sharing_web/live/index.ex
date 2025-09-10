@@ -10,7 +10,8 @@ defmodule SharingWeb.Index do
     {
       :ok,
       socket
-      |> assign(:shared, false)
+      |> State.set(allow_uploads: true)
+      |> State.set(debug: true)
       |> assign(:petname, petname())
       |> assign(:uploaded_files, [])
       |> allow_upload(
@@ -120,11 +121,9 @@ defmodule SharingWeb.Index do
     {
       :noreply,
       socket
-      |> assign(:shared, true)
+      |> State.set()
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
       |> push_event("show-code", %{})
-      |> push_event("close-uploads", %{val: true})
-      |> push_event("disable-mouse-events", %{val: true})
     }
   end
 
@@ -141,7 +140,7 @@ defmodule SharingWeb.Index do
       <div class="flex justify-center">
         <DropArea.render
           input={@input}
-          class="h-44 max-w-md w-2/3 cursor-pointer"
+          class="h-44 max-w-md w-2/3 allow-uploads:cursor-pointer"
         />
       </div>
     </div>
@@ -152,34 +151,45 @@ defmodule SharingWeb.Index do
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
-  def render(assigns) do
+  slot(:inner_block, required: true)
+
+  def hooks(assigns) do
     ~H"""
     <div id="window-drag-events" phx-hook="WindowDragEvents">
-      <div data-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
-        <div class="flex flex-col gap-6">
-          <div class="flex justify-between">
-            <ActionButton.render code={@petname} />
-            <Info.render />
-          </div>
-          <form
-            phx-submit="upload"
-            phx-change="validate">
-            <.drop_area input={@uploads.files.ref} />
-            <.live_file_input
-              disabled={@shared}
-              class="sr-only"
-              upload={@uploads.files}
-            />
-          </form>
-          <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <ItemCard.render
-              :for={item <- ItemCard.normalize(@uploads.files)}
-              item={item}
-            />
-          </div>
+      <div id="state-events" phx-hook="StateEvents">
+        <%= render_slot(@inner_block) %>
+      </div>
+    </div>
+    """
+  end
+
+  def render(assigns) do
+    ~H"""
+    <.hooks>
+    <div data-has-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
+      <div class="flex flex-col gap-6">
+        <div class="flex justify-between">
+          <ActionButton.render code={@petname} />
+          <Info.render />
+        </div>
+        <form
+          phx-submit="upload"
+          phx-change="validate">
+          <.drop_area input={@uploads.files.ref} />
+          <.live_file_input
+            class="sr-only"
+            upload={@uploads.files}
+          />
+        </form>
+        <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ItemCard.render
+            :for={item <- ItemCard.normalize(@uploads.files)}
+            item={item}
+          />
         </div>
       </div>
     </div>
+    </.hooks>
     """
   end
 end

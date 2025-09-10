@@ -1,6 +1,8 @@
+import { log } from "./state"
+
 export default KeyEvents = {
   mounted() {
-    console.log("Listening to key events on", this.el)
+    log("Listening to key events on", this.el)
 
     this.handleKeyDown = (e) => {
       if (e.key == "Escape" || e.key == "Enter") {

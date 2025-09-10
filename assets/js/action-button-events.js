@@ -1,7 +1,6 @@
 // Animations of the action button.
-import gsap from "../vendor/gsap"
 import { ID, Scene } from "./gsap"
-
+import { log } from "./state"
 
 function dark() {
   return window.matchMedia
@@ -11,7 +10,7 @@ function dark() {
 
 export default ActionButtonEvents = {
   mounted() {
-    console.log("Listening to action button events")
+     log("Listening to action button events")
     
     const input = new ID("ab-input");
     const inputContent = new ID("ab-input-content");
