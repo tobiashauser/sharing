@@ -21,7 +21,9 @@ defmodule SharingWeb.DropArea do
     <div>
       <button
         type="submit"
-        class={@class <> " not-has-uploads:sr-only"}>
+        class={@class <> " not-has-uploads:sr-only"}
+        phx-click="submit-files"
+      >
         <span class={@icon} />
       </button>
       <div class={@class <> " has-uploads:sr-only"}>

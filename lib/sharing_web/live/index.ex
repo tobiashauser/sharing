@@ -7,12 +7,15 @@ defmodule SharingWeb.Index do
   alias SharingWeb.ItemCard
 
   def mount(_params, _session, socket) do
+    petname = petname()
+
     {
       :ok,
       socket
       |> State.set(allow_uploads: true, debug: true)
-      |> assign(:petname, petname())
+      |> assign(:petname, petname)
       |> assign(:uploaded_files, [])
+      |> assign(:sharing, Path.join(Application.app_dir(:sharing, "store"), petname))
       |> allow_upload(
         :files,
         accept: :any,
@@ -66,6 +69,36 @@ defmodule SharingWeb.Index do
     |> String.trim_trailing("\n")
   end
 
+  # This handles some of the logic of `handle_event("upload", ...)'.
+  # Disabled, because the entires are removed from socket once the
+  # upload is finished. Because I uploaded folders at once, this leads
+  # to weird jumps whenever a file is finished and the size of the
+  # folder decreases.
+
+  # defp handle_progress(:files, entry, socket) do
+  #   if entry.done? do
+  #     uploaded_file =
+  #       consume_uploaded_entry(socket, entry, fn %{path: path} ->
+  #         file =
+  #           Path.join(
+  #             socket.assigns.sharing,
+  #             if(entry.client_relative_path == "",
+  #               do: entry.client_name,
+  #               else: entry.client_relative_path
+  #             )
+  #           )
+
+  #         File.mkdir_p(Path.dirname(file))
+  #         File.cp!(path, file)
+  #         {:ok, file}
+  #       end)
+
+  #     {:noreply, socket |> update(:uploaded_files, &(&1 ++ [uploaded_file]))}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+
   ### Action Button ---------------------------------------
 
   def handle_event("show-input", _params, socket) do
@@ -87,7 +120,11 @@ defmodule SharingWeb.Index do
   ### File Uploads ----------------------------------------
 
   def handle_event("open-file-picker", _params, socket) do
-    {:noreply, socket |> push_event("click", %{id: socket.assigns.uploads.files.ref})}
+    {
+      :noreply,
+      socket
+      |> push_event("click", %{id: socket.assigns.uploads.files.ref})
+    }
   end
 
   def handle_event("directories", params, socket) do
@@ -113,30 +150,28 @@ defmodule SharingWeb.Index do
 
   ### Save Uploads ----------------------------------------
 
-  # Handles the uploads and bundles them in an archive at
-  # store/<petname>.zip.
-  def handle_event("upload", _params, socket) do
-    # Eagerly update some state in the socket!
-    socket =
+  # Called whenever the submit button is clicked. This will eagerly
+  # update some state. 
+  def handle_event("submit-files", _params, socket) do
+    {
+      :noreply,
       socket
       |> State.set(allow_uploads: false)
       |> push_event("remove-hovering", %{})
-      |> push_event("show-code", %{})
+    }
+  end
 
-    # The uploaded entry is temporarily stored at PATH. We
-    # temporaryily persist the files keeping the folder structure.
-    sharing =
-      Path.join(
-        Application.app_dir(:sharing, "store"),
-        socket.assigns.petname
-      )
-
-    # Handle the uploaded entries.
+  # Handles the uploads and bundles them in an archive at
+  # store/<petname>.zip. This is only called after the files have been
+  # uploaded which is handled in `handle_progress/3'.
+  def handle_event("upload", _params, socket) do
+    # The uploaded entries are temporarily stored at SHARING before
+    # they are archived.
     uploaded_files =
       consume_uploaded_entries(socket, :files, fn %{path: path}, entry ->
         file =
           Path.join(
-            sharing,
+            socket.assigns.sharing,
             if(entry.client_relative_path == "",
               do: entry.client_name,
               else: entry.client_relative_path
@@ -145,23 +180,28 @@ defmodule SharingWeb.Index do
 
         File.mkdir_p(Path.dirname(file))
         File.cp!(path, file)
+
         {:ok, file}
       end)
 
-    # Zip up SHARING.
+    # Zip up the sharing.
     :zip.create(
-      String.to_charlist(sharing <> ".zip"),
-      Enum.map(uploaded_files, &String.to_charlist(String.trim_leading(&1, sharing <> "/"))),
-      cwd: String.to_charlist(sharing)
+      String.to_charlist(socket.assigns.sharing <> ".zip"),
+      Enum.map(
+        uploaded_files,
+        &String.to_charlist(String.trim_leading(&1, socket.assigns.sharing <> "/"))
+      ),
+      cwd: String.to_charlist(socket.assigns.sharing)
     )
 
     # Clean up the staging directory.
-    File.rm_rf(sharing)
+    File.rm_rf(socket.assigns.sharing)
 
     {
       :noreply,
       socket
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
+      |> push_event("show-code", %{})
     }
   end
 
@@ -193,9 +233,11 @@ defmodule SharingWeb.Index do
 
   def hooks(assigns) do
     ~H"""
-    <div id="state-events" phx-hook="StateEvents">
-      <div id="window-drag-events" phx-hook="WindowDragEvents">
-        <%= render_slot(@inner_block) %>
+    <div id="gsap-events" phx-hook="GsapEvents">
+      <div id="state-events" phx-hook="StateEvents">
+        <div id="window-drag-events" phx-hook="WindowDragEvents">
+          <%= render_slot(@inner_block) %>
+        </div>
       </div>
     </div>
     """

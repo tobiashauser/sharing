@@ -25,11 +25,30 @@ defmodule SharingWeb.ItemCard do
             |> List.first()
 
           case acc do
-            [%{name: name, size: size, refs: refs} | rest] when name == folder_name ->
-              [%{folder: true, name: folder_name, size: size + 1, refs: [item.ref | refs]} | rest]
+            [%{name: name, size: size, refs: refs, contents: contents} | rest]
+            when name == folder_name ->
+              [
+                %{
+                  folder: true,
+                  name: folder_name,
+                  size: size + 1,
+                  refs: [item.ref | refs],
+                  contents: [item | contents]
+                }
+                | rest
+              ]
 
             _ ->
-              [%{folder: true, name: folder_name, size: 1, refs: [item.ref]} | acc]
+              [
+                %{
+                  folder: true,
+                  name: folder_name,
+                  size: 1,
+                  refs: [item.ref],
+                  contents: [item]
+                }
+                | acc
+              ]
           end
       end
     end)
@@ -143,23 +162,32 @@ defmodule SharingWeb.ItemCard do
 
   attr(:title, :string)
   attr(:item, :map)
+  attr(:progress, :integer)
 
   def card(assigns) do
     ~H"""
-    <div class= "flex items-center gap-2 p-2 rounded border-1 border-surface">
-      <.symbol class="center-content p-2 rounded bg-elevated" item={@item} />
-      <div class="flex justify-between items-center w-full overflow-hidden">
-        <div class="flex flex-col min-w-0 mr-2 gap-0.5">
-          <div class="text-sm font-medium truncate">{@title}</div>
-          <div class="text-subtle text-xs">
-            <.info item={@item} />
+    <div class="relative rounded border-1 border-surface">
+      <div class="flex items-center gap-2 p-2">
+        <.symbol class="center-content p-2 rounded bg-elevated" item={@item} />
+        <div class="flex justify-between items-center w-full overflow-hidden">
+          <div class="flex flex-col min-w-0 mr-2 gap-0.5">
+            <div class="text-sm font-medium truncate">{@title}</div>
+            <div class="text-subtle text-xs">
+              <.info item={@item} />
+            </div>
           </div>
+          <.cancel
+            class="border hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70 not-allow-uploads:hidden"
+            item={@item}
+          />
         </div>
-        <.cancel
-          class="border hero-x-circle-solid size-5 cursor-pointer text-overlay hover:text-critical/70"
-          item={@item}
-        />
       </div>
+      
+      <!-- This is the progress indicator. -->
+      <div
+        class="absolute top-0 bg-surface z-[-1] left-0 bottom-0 transition-[width] duration-300"
+        style={"width: #{@progress}%;"}
+        />
     </div>
     """
   end
@@ -173,6 +201,7 @@ defmodule SharingWeb.ItemCard do
     <.card
       title={@item.file.client_name}
       item={@item}
+      progress={assigns.item.file.progress}
     />
     """
   end
@@ -182,6 +211,11 @@ defmodule SharingWeb.ItemCard do
     <.card
       title={@item.name}
       item={@item}
+      progress={
+      Enum.reduce(assigns.item.contents, 0, fn entry, acc ->
+        acc + entry.progress / assigns.item.size
+      end)
+    }
     />
     """
   end

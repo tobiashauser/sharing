@@ -8,6 +8,7 @@ export default GsapEvents = {
      log("Listening to gsap events")
     
     this.handleGsapTo = (e) => {
+      log("Animating", e.detail.targets)
       gsap.to(e.detail.targets, e.detail.vars)
     }
 

@@ -50,7 +50,7 @@ defmodule SharingWeb.ActionButton do
     <button
       id="ab-enter-code"
       class={"center-content " <> @class}
-      phx-click="show-code">
+      phx-click="show-input">
       <span
         id="ab-enter-code-content"
         class={@contentClass}>
