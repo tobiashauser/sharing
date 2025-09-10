@@ -10,8 +10,7 @@ defmodule SharingWeb.Index do
     {
       :ok,
       socket
-      |> State.set(allow_uploads: true)
-      |> State.set(debug: true)
+      |> State.set(allow_uploads: true, debug: true)
       |> assign(:petname, petname())
       |> assign(:uploaded_files, [])
       |> allow_upload(
@@ -115,13 +114,17 @@ defmodule SharingWeb.Index do
   ### Save Uploads ----------------------------------------
 
   def handle_event("upload", _params, socket) do
-    dbg(socket)
-    uploaded_files = []
+    uploaded_files =
+      consume_uploaded_entries(socket, :files, fn opts, entry ->
+        dbg(opts)
+        dbg(entry)
+      end)
 
     {
       :noreply,
       socket
-      |> State.set()
+      |> State.set(allow_uploads: false)
+      |> push_event("remove-hovering", %{})
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
       |> push_event("show-code", %{})
     }
@@ -140,7 +143,7 @@ defmodule SharingWeb.Index do
       <div class="flex justify-center">
         <DropArea.render
           input={@input}
-          class="h-44 max-w-md w-2/3 allow-uploads:cursor-pointer"
+          class="h-44 max-w-md w-2/3"
         />
       </div>
     </div>
@@ -155,8 +158,8 @@ defmodule SharingWeb.Index do
 
   def hooks(assigns) do
     ~H"""
-    <div id="window-drag-events" phx-hook="WindowDragEvents">
-      <div id="state-events" phx-hook="StateEvents">
+    <div id="state-events" phx-hook="StateEvents">
+      <div id="window-drag-events" phx-hook="WindowDragEvents">
         <%= render_slot(@inner_block) %>
       </div>
     </div>

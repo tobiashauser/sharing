@@ -61,7 +61,7 @@ defmodule SharingWeb.DropArea do
       phx-hook="MouseEvents"
       class={
         "grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]"
-        <> " dark:bg-elevated"
+        <> " dark:bg-elevated allow-uploads:cursor-pointer"
         <> " " <> @class}>
       <div class={
         "m-4 center-content transition" 

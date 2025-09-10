@@ -46,6 +46,15 @@ const liveSocket = new LiveSocket("/live", Socket, {
     StateEvents,
     WindowDragEvents,
   },
+  dom: {
+    onBeforeElUpdated(from, to) {
+      for (const attr of from.attributes) {
+        if (attr.name.startsWith("data-state-")) {
+          to.setAttribute(attr.name, attr.value);
+        }
+      }
+    }
+  }
 })
 
 // Show progress bar on live navigation and form submits
