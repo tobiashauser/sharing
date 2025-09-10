@@ -101,7 +101,7 @@ export default WindowDragEvents = {
       
       // The drag event has ended.
       this.el.setAttribute("data-dragging", "false");
-      drags= 0;
+      dragsStack = 0;
 
       const entries = event.dataTransfer.items;
       for (let i = 0; i < entries.length; i++) {
