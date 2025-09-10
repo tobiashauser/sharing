@@ -55,7 +55,6 @@ defmodule SharingWeb.Index do
         end)
       )
     end)
-    |> dbg_entries()
   end
 
   ### Action Button ---------------------------------------
@@ -113,12 +112,17 @@ defmodule SharingWeb.Index do
   ### Components                                                            ###
   ### --------------------------------------------------------------------- ###
 
+  attr(:input, :string)
+
   # Must contain a button with type submit!
   defp drop_area(assigns) do
     ~H"""
     <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
       <div class="flex justify-center">
-        <DropArea.render class="h-44 max-w-md w-2/3 cursor-pointer" />
+        <DropArea.render
+          input={@input}
+          class="h-44 max-w-md w-2/3 cursor-pointer"
+        />
       </div>
     </div>
     """
@@ -140,9 +144,7 @@ defmodule SharingWeb.Index do
           <form
             phx-submit="upload"
             phx-change="validate">
-            <label for={@uploads.files.ref}>
-              <.drop_area active={!Enum.empty?(@uploads.files.entries)} />
-            </label>
+            <.drop_area input={@uploads.files.ref} />
             <.live_file_input
               class="sr-only"
               upload={@uploads.files}

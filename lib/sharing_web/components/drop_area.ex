@@ -15,7 +15,6 @@ defmodule SharingWeb.DropArea do
 
   attr(:class, :string, default: "")
   attr(:icon, :string, default: "hero-arrow-up-tray-mini")
-  attr(:active, :boolean, default: true)
 
   def button(assigns) do
     ~H"""
@@ -32,12 +31,9 @@ defmodule SharingWeb.DropArea do
     """
   end
 
-  attr(:active, :boolean, default: false)
-
   def content(assigns) do
     ~H"""
     <.button
-      active={@active}
       class={
         "p-3 mb-3 center-content transition cursor-pointer"
         <> " border-2 border-subtle/40 rounded-full"
@@ -54,11 +50,13 @@ defmodule SharingWeb.DropArea do
     """
   end
 
+  attr(:input, :string)
   attr(:class, :string, default: "")
 
   def render(assigns) do
     ~H"""
-    <div
+    <label
+      for={@input}
       id="drop-area"
       phx-hook="MouseEvents"
       class={"grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] dark:bg-elevated" <> " " <> @class} >
@@ -70,7 +68,7 @@ defmodule SharingWeb.DropArea do
       }>
         <.content />
       </div>  
-    </div>
+    </label>
     """
   end
 end

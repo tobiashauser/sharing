@@ -124,7 +124,7 @@ export default WindowDragEvents = {
                 })
 
               const filteredFiles = filesAndRef
-                .map(([file, path, ref]) => file)
+                .map(([file, _]) => file)
               this.upload("files", filteredFiles)
 
               // Send the paths to the server. This must be called AFTER `upload'!
