@@ -113,20 +113,55 @@ defmodule SharingWeb.Index do
 
   ### Save Uploads ----------------------------------------
 
+  # Handles the uploads and bundles them in an archive at
+  # store/<petname>.zip.
   def handle_event("upload", _params, socket) do
+    # Eagerly update some state in the socket!
+    socket =
+      socket
+      |> State.set(allow_uploads: false)
+      |> push_event("remove-hovering", %{})
+      |> push_event("show-code", %{})
+
+    # The uploaded entry is temporarily stored at PATH. We
+    # temporaryily persist the files keeping the folder structure.
+    sharing =
+      Path.join(
+        Application.app_dir(:sharing, "store"),
+        socket.assigns.petname
+      )
+
+    # Handle the uploaded entries.
     uploaded_files =
-      consume_uploaded_entries(socket, :files, fn opts, entry ->
-        dbg(opts)
-        dbg(entry)
+      consume_uploaded_entries(socket, :files, fn %{path: path}, entry ->
+        file =
+          Path.join(
+            sharing,
+            if(entry.client_relative_path == "",
+              do: entry.client_name,
+              else: entry.client_relative_path
+            )
+          )
+
+        File.mkdir_p(Path.dirname(file))
+        File.cp!(path, file)
+        {:ok, file}
       end)
+
+    # Zip up SHARING.
+    :zip.create(
+      String.to_charlist(sharing <> ".zip"),
+      Enum.map(uploaded_files, &String.to_charlist(String.trim_leading(&1, sharing <> "/"))),
+      cwd: String.to_charlist(sharing)
+    )
+
+    # Clean up the staging directory.
+    File.rm_rf(sharing)
 
     {
       :noreply,
       socket
-      |> State.set(allow_uploads: false)
-      |> push_event("remove-hovering", %{})
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
-      |> push_event("show-code", %{})
     }
   end
 
