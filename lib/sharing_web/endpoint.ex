@@ -16,6 +16,12 @@ defmodule SharingWeb.Endpoint do
     longpoll: [connect_info: [session: @session_options]]
   )
 
+  plug(Plug.Static,
+    at: "/store",
+    from: {:sharing, "store"},
+    gzip: not code_reloading?
+  )
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # When code reloading is disabled (e.g., in production),

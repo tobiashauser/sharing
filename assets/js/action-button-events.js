@@ -113,8 +113,17 @@ export default ActionButtonEvents = {
       showButton.animate()
     }
 
-    this.handleShowCode = (_) => {
+    this.handleShowCode = (e) => {
       showCode.animate()
+
+      // Also display the qr code in the drop area.
+      img = document.getElementById("qr-code")
+      img.src = "/store/" + e.detail.code + ".svg"
+
+      // Delay showing the image.
+      setTimeout(() => {
+        img.classList.remove("opacity-0")
+      }, 300)
     }
 
     // Initiates a download from a given code, while performing some

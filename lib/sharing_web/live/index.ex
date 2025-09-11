@@ -6,16 +6,15 @@ defmodule SharingWeb.Index do
   alias SharingWeb.Info
   alias SharingWeb.ItemCard
 
-  def mount(_params, _session, socket) do
+  def mount(params, session, socket) do
     petname = petname()
 
     {
       :ok,
       socket
-      |> State.set(allow_uploads: true, debug: true)
+      |> State.set(allow_uploads: true, debug: true, code: false)
       |> assign(:petname, petname)
       |> assign(:uploaded_files, [])
-      |> assign(:qr, "")
       |> assign(:sharing, Path.join(Application.app_dir(:sharing, "store"), petname))
       |> allow_upload(
         :files,
@@ -27,7 +26,11 @@ defmodule SharingWeb.Index do
   end
 
   def handle_params(_params, uri, socket) do
-    {:noreply, assign(socket, :current_uri, uri)}
+    {
+      :noreply,
+      socket
+      |> assign(:uri, uri)
+    }
   end
 
   ### --------------------------------------------------------------------- ###
@@ -74,13 +77,30 @@ defmodule SharingWeb.Index do
     |> String.trim_trailing("\n")
   end
 
-  defp qrcode(socket) do
-    url = socket.assigns.current_uri <> socket.assigns.petname
-    output = socket.assigns.sharing <> ".png"
-    System.cmd("qrrs", ["-o", "image", url, output])
+  # defp qr_code(socket, uri) do
+  #   if Map.has_key?(socket.assigns, :code) do
+  #     dbg("JKL")
+  #     dbg(socket.assigns)
+  #     socket
+  #   else
+  #     url = uri <> "store/" <> socket.assigns.petname <> ".png"
+  #     output = socket.assigns.sharing <> ".png"
+  #     System.cmd("qrrs", ["-o", "image", url, output])
+
+  #     socket
+  #     |> assign(code: output)
+  #   end
+  # end
+
+  defp qr_code(socket) do
+    url = socket.assigns.uri <> socket.assigns.petname
+    output = socket.assigns.sharing <> ".svg"
+
+    System.cmd("qrrs", ["-o", "svg", url, output])
 
     socket
-    |> assign(:qr, output)
+    |> assign(code_path: output)
+    |> State.set(code: true)
   end
 
   # This handles some of the logic of `handle_event("upload", ...)'.
@@ -221,10 +241,21 @@ defmodule SharingWeb.Index do
     {
       :noreply,
       socket
+      |> qr_code()
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
-      |> push_event("show-code", %{})
-      |> qrcode()
+      |> push_event("show-code", %{code: socket.assigns.petname})
     }
+  end
+
+  ### Cleanup ---------------------------------------------
+
+  def terminate(_, socket) do
+    if Map.has_key?(socket.assigns, :code_path) do
+      dbg(socket.assigns.code_path)
+      File.rm(socket.assigns.code_path)
+    end
+
+    :ok
   end
 
   ### --------------------------------------------------------------------- ###
@@ -232,6 +263,7 @@ defmodule SharingWeb.Index do
   ### --------------------------------------------------------------------- ###
 
   attr(:input, :string)
+  attr(:code, :string)
 
   # Must contain a button with type submit!
   defp drop_area(assigns) do
@@ -240,7 +272,7 @@ defmodule SharingWeb.Index do
       <div class="flex justify-center">
         <DropArea.render
           input={@input}
-          class="h-44 max-w-md w-2/3"
+          code={@code}
         />
       </div>
     </div>
@@ -268,29 +300,32 @@ defmodule SharingWeb.Index do
   def render(assigns) do
     ~H"""
     <.hooks>
-    <div data-has-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
-      <div class="flex flex-col gap-6">
-        <div class="flex justify-between">
-          <ActionButton.render code={@petname} />
-          <Info.render />
-        </div>
-        <form
-          phx-submit="upload"
-          phx-change="validate">
-          <.drop_area input={@uploads.files.ref} />
-          <.live_file_input
-            class="sr-only"
-            upload={@uploads.files}
-          />
-        </form>
-        <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <ItemCard.render
-            :for={item <- ItemCard.normalize(@uploads.files)}
-            item={item}
-          />
+      <div data-has-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
+        <div class="flex flex-col gap-6">
+          <div class="flex justify-between">
+            <ActionButton.render code={@petname} />
+            <Info.render />
+          </div>
+          <form
+            phx-submit="upload"
+            phx-change="validate">
+            <.drop_area
+              input={@uploads.files.ref}
+              code={@petname}
+            />
+            <.live_file_input
+              class="sr-only"
+              upload={@uploads.files}
+            />
+          </form>
+          <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <ItemCard.render
+              :for={item <- ItemCard.normalize(@uploads.files)}
+              item={item}
+            />
+          </div>
         </div>
       </div>
-    </div>
     </.hooks>
     """
   end
