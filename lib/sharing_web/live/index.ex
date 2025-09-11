@@ -15,6 +15,7 @@ defmodule SharingWeb.Index do
       |> State.set(allow_uploads: true, debug: true)
       |> assign(:petname, petname)
       |> assign(:uploaded_files, [])
+      |> assign(:qr, "")
       |> assign(:sharing, Path.join(Application.app_dir(:sharing, "store"), petname))
       |> allow_upload(
         :files,
@@ -23,6 +24,10 @@ defmodule SharingWeb.Index do
         max_file_size: 1_000_000_000
       )
     }
+  end
+
+  def handle_params(_params, uri, socket) do
+    {:noreply, assign(socket, :current_uri, uri)}
   end
 
   ### --------------------------------------------------------------------- ###
@@ -67,6 +72,15 @@ defmodule SharingWeb.Index do
 
     petname
     |> String.trim_trailing("\n")
+  end
+
+  defp qrcode(socket) do
+    url = socket.assigns.current_uri <> socket.assigns.petname
+    output = socket.assigns.sharing <> ".png"
+    System.cmd("qrrs", ["-o", "image", url, output])
+
+    socket
+    |> assign(:qr, output)
   end
 
   # This handles some of the logic of `handle_event("upload", ...)'.
@@ -209,6 +223,7 @@ defmodule SharingWeb.Index do
       socket
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
       |> push_event("show-code", %{})
+      |> qrcode()
     }
   end
 
