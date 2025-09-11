@@ -104,18 +104,19 @@ defmodule SharingWeb.ActionButton do
       id="action-button"
       phx-hook="ActionButtonEvents"
       class="flex justify-start font-medium text-sm">
-      <div class={"inline-flex truncate text-clip border border-surface/60 rounded" <> " " <> @class}>
+      <div class={"inline-flex truncate text-clip border transition border-surface/60 rounded invalid:border-critical" <> " " <> @class}>
         <.action_button_input
           class="w-0"
-          contentClass="focus:outline-none py-1 px-2 invisible opacity-0"
+          contentClass="focus:outline-none transition py-1 px-2 invisible opacity-0 invalid:text-critical"
         />
         <.action_button_download
           class={
-            "w-0 cursor-pointer text-subtle"
+            "w-0 cursor-pointer text-subtle transition"
             <> " bg-surface/60"
-            <> " hover:text-foreground hover:bg-surface"
+            <> " hover:text-foreground hover:not-invalid:bg-surface"
+            <> " invalid:bg-critical/60"
           }
-          contentClass="focus:outline-none mx-2 invisible opacity-0"
+          contentClass="focus:outline-none mx-2 invisible opacity-0 transition invalid:text-critical"
         />
         <.action_button_enter_code
           class={

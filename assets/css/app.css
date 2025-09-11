@@ -18,10 +18,11 @@
 /* (Ab)use data attributes to store state ONLY needed for the view. */
 @custom-variant dragging (&:where([data-dragging=true], [data-dragging=true] *));
 @custom-variant hovering (&:where([data-hovering=true], [data-hovering=true] *));
-@custom-variant has-uploads  (&:where([data-has-uploads], [data-has-uploads] *));
+@custom-variant has-uploads (&:where([data-has-uploads], [data-has-uploads] *));
+@custom-variant invalid (&:where([data-invalid=true], [data-invalid=true] *));
 
 /* These are variants from my little state library. */
-@custom-variant allow-uploads  (&:where([data-state-allow_uploads=true], [data-state-allow_uploads=true] *));
+@custom-variant allow-uploads (&:where([data-state-allow_uploads=true], [data-state-allow_uploads=true] *));
 
 /* Make LiveView wrapper divs transparent for layout. */
 [data-phx-session], [data-phx-teleported-src] { display: contents }

@@ -114,7 +114,14 @@ defmodule SharingWeb.Index do
   end
 
   def handle_event("submit-code", %{"code" => code}, socket) do
-    {:noreply, socket}
+    path =
+      Path.join(Application.app_dir(:sharing, "store"), "#{code}.zip")
+
+    if File.exists?(path) do
+      {:reply, %{continue: true}, socket}
+    else
+      {:reply, %{continue: false}, socket}
+    end
   end
 
   ### File Uploads ----------------------------------------

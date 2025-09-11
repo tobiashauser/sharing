@@ -18,6 +18,7 @@ defmodule SharingWeb.Router do
     pipe_through(:browser)
 
     live("/", Index)
+    get("/:code", ServeArchiveController, :serve)
   end
 
   # Other scopes may use custom stacks.
