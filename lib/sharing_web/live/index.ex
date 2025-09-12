@@ -208,38 +208,20 @@ defmodule SharingWeb.Index do
   end
 
   ### --------------------------------------------------------------------- ###
-  ### Components                                                            ###
-  ### --------------------------------------------------------------------- ###
-
-  attr(:input, :string)
-  attr(:code, :string)
-
-  # Must contain a button with type submit!
-  defp drop_area(assigns) do
-    ~H"""
-    <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
-      <div class="flex justify-center">
-        <DropArea.render
-          input={@input}
-          code={@code}
-        />
-      </div>
-    </div>
-    """
-  end
-
-  ### --------------------------------------------------------------------- ###
   ### View                                                                  ###
   ### --------------------------------------------------------------------- ###
 
+  attr(:has_uploads, :boolean)
   slot(:inner_block, required: true)
 
   def hooks(assigns) do
     ~H"""
-    <div id="gsap-events" phx-hook="GsapEvents">
-      <div id="state-events" phx-hook="StateEvents">
-        <div id="window-drag-events" phx-hook="WindowDragEvents">
-          <%= render_slot(@inner_block) %>
+    <div data-has-uploads={@has_uploads}>
+      <div id="gsap-events" phx-hook="GsapEvents">
+        <div id="state-events" phx-hook="StateEvents">
+          <div id="window-drag-events" phx-hook="WindowDragEvents">
+            <%= render_slot(@inner_block) %>
+          </div>
         </div>
       </div>
     </div>
@@ -248,31 +230,33 @@ defmodule SharingWeb.Index do
 
   def render(assigns) do
     ~H"""
-    <.hooks>
-      <div data-has-uploads={!Enum.empty?(assigns.uploads.files.entries)}>
-        <div class="flex flex-col gap-6">
-          <div class="flex justify-between">
-            <ActionButton.render code={@petname} />
-            <Info.render />
+    <.hooks has_uploads={!Enum.empty?(assigns.uploads.files.entries)} >
+      <div class="flex flex-col gap-6">
+        <div class="flex justify-between">
+          <ActionButton.render petname={@petname} />
+          <Info.render />
+        </div>
+        <form
+          phx-submit="upload"
+          phx-change="validate">
+          <div class="mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
+            <div class="flex justify-center">
+              <DropArea.render
+                input={@uploads.files.ref}
+                code={@petname}
+              />
+            </div>
           </div>
-          <form
-            phx-submit="upload"
-            phx-change="validate">
-            <.drop_area
-              input={@uploads.files.ref}
-              code={@petname}
-            />
-            <.live_file_input
-              class="sr-only"
-              upload={@uploads.files}
-            />
-          </form>
-          <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <ItemCard.render
-              :for={item <- ItemCard.normalize(@uploads.files)}
-              item={item}
-            />
-          </div>
+          <.live_file_input
+            class="sr-only"
+            upload={@uploads.files}
+          />
+        </form>
+        <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ItemCard.render
+            :for={item <- ItemCard.normalize(@uploads.files)}
+            item={item}
+          />
         </div>
       </div>
     </.hooks>
