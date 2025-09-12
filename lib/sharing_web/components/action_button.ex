@@ -45,7 +45,7 @@ defmodule SharingWeb.ActionButton do
       class={"center-content text-subtle cursor-pointer"
         <> " hover:text-foreground hover:bg-surface"
         <> " not-dark:bg-surface/60"}
-      phx-click="show-input">
+      phx-click="ab-show-input">
       <span
         id="ab-enter-code-content"
         class="px-2">

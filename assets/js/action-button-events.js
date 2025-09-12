@@ -181,18 +181,18 @@ export default ActionButtonEvents = {
       }
     }
 
-    window.addEventListener("phx:show-input", this.handleShowInput)
-    window.addEventListener("phx:show-button", this.handleShowButton)
-    window.addEventListener("phx:show-code", this.handleShowCode)
+    window.addEventListener("phx:ab-show-input", this.handleShowInput)
+    window.addEventListener("phx:ab-show-button", this.handleShowButton)
+    window.addEventListener("phx:ab-show-code", this.handleShowCode)
     this.inputContent.element.addEventListener("blur", this.handleInputContentBlur)
     this.inputContent.element.addEventListener("keydown", this.handleInputContentKeydown)
     this.download.element.addEventListener("click", this.handleDownloadClick)
   },
 
   destroyed() {
-    window.removeEventListener("phx:show-input", this.handleShowInput)
-    window.removeEventListener("phx:show-button", this.handleShowButton)
-    window.removeEventListener("phx:show-code", this.handleShowCode)
+    window.removeEventListener("phx:ab-show-input", this.handleShowInput)
+    window.removeEventListener("phx:ab-show-button", this.handleShowButton)
+    window.removeEventListener("phx:ab-show-code", this.handleShowCode)
     this.inputContent.element.removeEventListener("blur", this.handleInputContentBlur)
     this.inputContent.element.removeEventListener("keydown", this.handleInputKeydown)
     this.download.element.removeEventListener("click", this.handleDownloadClick)

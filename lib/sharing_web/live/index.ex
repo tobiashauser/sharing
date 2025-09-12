@@ -87,16 +87,16 @@ defmodule SharingWeb.Index do
 
   ### Action Button ---------------------------------------
 
-  def handle_event("show-input", _params, socket) do
-    {:noreply, socket |> push_event("show-input", %{})}
+  def handle_event("ab-show-input", _params, socket) do
+    {:noreply, socket |> push_event("ab-show-input", %{})}
   end
 
-  def handle_event("show-button", _params, socket) do
-    {:noreply, socket |> push_event("show-button", %{})}
+  def handle_event("ab-show-button", _params, socket) do
+    {:noreply, socket |> push_event("ab-show-button", %{})}
   end
 
-  def handle_event("show-code", _params, socket) do
-    {:noreply, socket |> push_event("show-code", %{})}
+  def handle_event("ab-show-code", _params, socket) do
+    {:noreply, socket |> push_event("ab-show-code", %{})}
   end
 
   def handle_event("submit-code", %{"code" => code}, socket) do
@@ -194,7 +194,7 @@ defmodule SharingWeb.Index do
       socket
       |> qr_code()
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
-      |> push_event("show-code", %{code: socket.assigns.petname})
+      |> push_event("ab-show-code", %{code: socket.assigns.petname})
     }
   end
 
@@ -254,6 +254,8 @@ defmodule SharingWeb.Index do
             upload={@uploads.files}
           />
         </form>
+        <!-- QR Code -->
+        <img
         <!-- Item Cards -->
         <div class={
           "grid justify-center-safe gap-2 snap-mandatory auto-cols-[minmax(300px,400px)]"
