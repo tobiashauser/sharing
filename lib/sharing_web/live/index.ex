@@ -244,7 +244,7 @@ defmodule SharingWeb.Index do
             <div class="flex justify-center">
               <DropArea.render
                 input={@uploads.files.ref}
-                code={@petname}
+                has_uploads={!Enum.empty?(assigns.uploads.files.entries)}
               />
             </div>
           </div>

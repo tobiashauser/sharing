@@ -13,48 +13,42 @@ defmodule SharingWeb.DropArea do
   """
   use SharingWeb, :html
 
-  attr(:class, :string, default: "")
-  attr(:icon, :string, default: "hero-arrow-up-tray-mini")
-
-  def button(assigns) do
+  def symbol(assigns) do
     ~H"""
-    <div>
-      <button
-        type="submit"
-        class={@class <> " not-has-uploads:sr-only"}
-        phx-click="submit-files"
-      >
-        <span class={@icon} />
-      </button>
-      <div class={@class <> " has-uploads:sr-only"}>
-        <span class={@icon} />
-      </div>
+    <div 
+      class={
+        "p-3 mb-3 center-content transition border-2 border-subtle/40 rounded-full"
+        <> " dragging:border-salient dragging:bg-salient/20"
+        <> " has-uploads:border-popout has-uploads:bg-popout/20 has-uploads:shadow"
+        <> " allow-uploads:cursor-pointer"}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        class={
+          "size-5 text-subtle/70"
+          <> " dragging:text-salient"
+          <> " has-uploads:text-popout"}>
+        <path
+          id="da-tray"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25, 2.25 0 0 0 21 18.75V16.5m-13.5-9" />
+        <path
+          id="da-arrow"
+          class="origin-[12px_10px] dragging:-scale-100 transition"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M7.5 7.5 L12 3m0 0 4.5 4.5M12 3v13.5" />
+      </svg>
     </div>
     """
   end
 
-  def content(assigns) do
-    ~H"""
-    <.button
-      class={
-        "p-3 mb-3 center-content transition allow-uploads:cursor-pointer"
-        <> " border-2 border-subtle/40 rounded-full"
-        <> " dragging:border-salient dragging:bg-salient/20"
-        <> " has-uploads:border-popout has-uploads:bg-popout/20 has-uploads:shadow"}
-      icon={
-        "size-5 text-subtle/70 dragging:text-salient transition"
-        <> " hero-arrow-up-tray-mini"
-        <> " dragging:hero-arrow-down-tray-mini"
-        <> " has-uploads:text-popout"}
-    />
-    <p class="text-sm mb-1.5 font-medium">Upload files</p>
-    <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
-    """
-  end
-
   attr(:input, :string)
-  attr(:class, :string, default: "")
-  attr(:code, :string)
+  attr(:has_uploads, :boolean, default: true)
 
   def render(assigns) do
     ~H"""
@@ -64,21 +58,25 @@ defmodule SharingWeb.DropArea do
       phx-hook="MouseEvents"
       class={
         "relative rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] overflow-hidden"
-        <> " not-code:h-44 not-code:w-2/3 not-code:max-w-md"
-        <> " code:size-fit"
         <> " transition-[width] duration-300"
-        <> " dark:bg-elevated allow-uploads:cursor-pointer"
-        <> " " <> @class}>
+        <> " h-44 w-2/3 max-w-md"
+        <> " dark:bg-elevated"
+        <> " allow-uploads:cursor-pointer"}>
       <div class={
-        "code:sr-only center-content transition absolute left-4 right-4 top-4 bottom-4" 
+        "center-content absolute left-4 right-4 top-4 bottom-4"
         <> " border-2 border-transparent rounded-[9px] border-dashed"
+        <> " transition"
         <> " hovering:border-overlay hovering:bg-elevated"
-        <> " dragging:border-salient dragging:bg-salient/10"
-      }>
-        <.content />
-      </div>
-      <div class="center-content not-code:sr-only w-full h-full">
-        <img id="qr-code" class="opacity-0 transition dark:invert" />
+        <> " dragging:border-salient dragging:bg-salient/10"}>
+        <button
+          :if={@has_uploads}
+          type="submit"
+          phx-click="submit-files">
+          <.symbol />
+        </button>
+        <.symbol :if={!@has_uploads} />
+        <p class="text-sm mb-1.5 font-medium">Upload files</p>
+        <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
       </div>
     </label>
     """
