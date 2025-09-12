@@ -3,15 +3,12 @@ import { log } from "./state"
 
 window.addEventListener("phx:click", (e) => {
   const target = document.getElementById(e.detail.id)
-  log("Clicking", target)
+  log("[click]", target)
   target.click()
-  // const click = new Event("click")
-  // target.dispatchEvent(click)
-  // target.click()
 })
 
 window.addEventListener("phx:focus", (e) => {
   const target = document.getElementById(e.detail.id)
-  log("Focusing", target)
+  log("[focus]", target)
   target.focus()
 })

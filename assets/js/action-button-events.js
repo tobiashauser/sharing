@@ -117,13 +117,13 @@ export default ActionButtonEvents = {
       showCode.animate()
 
       // Also display the qr code in the drop area.
-      img = document.getElementById("qr-code")
-      img.src = "/store/" + e.detail.code + ".svg"
+      // img = document.getElementById("qr-code")
+      // img.src = "/store/" + e.detail.code + ".svg"
 
       // Delay showing the image.
-      setTimeout(() => {
-        img.classList.remove("opacity-0")
-      }, 300)
+      // setTimeout(() => {
+      //   img.classList.remove("opacity-0")
+      // }, 300)
     }
 
     // Initiates a download from a given code, while performing some
@@ -158,6 +158,7 @@ export default ActionButtonEvents = {
       const value = e.target.value
       if (e.key == "Escape") {
         showButton.animate()
+        this.actionButton.element.setAttribute("data-invalid", "")
       } else if (e.key == "Enter" && value != "" && value != undefined) {
         this.getCode(e.target.value.trim())
       } else {

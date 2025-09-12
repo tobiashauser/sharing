@@ -158,7 +158,6 @@ export default WindowDragEvents = {
     // The id is <file.name>:<file.webkitRelativePath>.
     this.handleFileIds = (event) => {
       uploadedFiles = event.detail.ids
-      log(uploadedFiles)
     };
 
     window.addEventListener("dragenter", this.handleDragEnter);

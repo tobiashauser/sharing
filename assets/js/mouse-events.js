@@ -16,14 +16,14 @@ export default MouseEvents = {
       if (!state.allow_uploads) return;
 
       log("mouseleave", "#" + this.el.id)
-      this.el.setAttribute("data-hovering", "false")
+      this.el.setAttribute("data-hovering", "")
     };
 
     // Since the upload button is inside the drop area state must be
     // cleanup up manually.
     this.handleRemoveHovering = (_) => {
       log("remove-hovering", "#" + this.el.id)
-      this.el.setAttribute("data-hovering", "false")
+      this.el.setAttribute("data-hovering", "")
     }
 
     this.el.addEventListener("mouseenter", this.handleMouseEnter);
