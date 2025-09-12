@@ -3,7 +3,7 @@ import { state, log } from "./state"
 
 export default MouseEvents = {
   mounted() {
-    log("Listening to mouse events on", this.el)
+    console.log("Listening to mouse events on", this.el)
     
     this.handleMouseEnter = (_) => {
       if (!state.allow_uploads) return;

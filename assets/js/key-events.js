@@ -6,7 +6,6 @@ export default KeyEvents = {
 
     this.handleKeyDown = (e) => {
       if (e.key == "Escape" || e.key == "Enter") {
-        console.log(this.el)
         this.pushEvent("keydown", {key: e.key})
       }
     }
