@@ -237,6 +237,7 @@ defmodule SharingWeb.Index do
           <ActionButton.render petname={@petname} />
           <Info.render />
         </div>
+        <!-- Drop Area -->
         <form
           phx-submit="upload"
           phx-change="validate">
@@ -253,7 +254,11 @@ defmodule SharingWeb.Index do
             upload={@uploads.files}
           />
         </form>
-        <div class="md:snap-x gap-2 md:grid-flow-col md:grid-rows-5 grid snap-mandatory auto-cols-[minmax(300px,400px)] justify-center-safe overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <!-- Item Cards -->
+        <div class={
+          "grid justify-center-safe gap-2 snap-mandatory auto-cols-[minmax(300px,400px)]"
+          <> " overflow-scroll [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          <> " md:snap-x md:grid-flow-col md:grid-rows-5"}>
           <ItemCard.render
             :for={item <- ItemCard.normalize(@uploads.files)}
             item={item}
