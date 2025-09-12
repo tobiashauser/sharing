@@ -1,4 +1,5 @@
 defmodule SharingWeb.Index do
+  alias SharingWeb.ServeArchiveController
   use SharingWeb, :live_view
 
   alias SharingWeb.ActionButton
@@ -14,6 +15,7 @@ defmodule SharingWeb.Index do
       socket
       # code => show qr-code
       |> State.set(allow_uploads: true, debug: true, code: false)
+      # code used for the sharing: e.g. huge-dingo
       |> assign(:petname, petname)
       |> assign(:uploaded_files, [])
       |> allow_upload(
@@ -73,13 +75,13 @@ defmodule SharingWeb.Index do
   end
 
   defp qr_code(socket) do
+    # www.sharing.org/huge-dingo -> server handles with `ServeArchiveController'
     url = socket.assigns.uri <> socket.assigns.petname
     output = code(socket)
 
     System.cmd("qrrs", ["-o", "svg", url, output])
 
     socket
-    |> assign(code_path: output)
     |> State.set(code: true)
   end
 
@@ -199,9 +201,8 @@ defmodule SharingWeb.Index do
   ### Cleanup ---------------------------------------------
 
   def terminate(_, socket) do
-    if Map.has_key?(socket.assigns, :code_path) do
-      dbg(socket.assigns.code_path)
-      File.rm(socket.assigns.code_path)
+    if socket.assigns.code do
+      File.rm(code(socket))
     end
 
     :ok
