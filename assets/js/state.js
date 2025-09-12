@@ -1,3 +1,8 @@
+// Phoenix will overwrite the attributes set above on rerenders. Add a
+// custom prefix to the livesocket, to persist the attributes. See
+// https://hexdocs.pm/phoenix_live_view/js-interop.html, especcially
+// the `onBeforeElUpdated` function.
+
 // Implement client state as a singleton.
 export let state = {};
 
@@ -12,10 +17,10 @@ export const StateEvents = {
       Object.assign(state, e.detail)
 
       for (const [k, v] of Object.entries(e.detail)) {
-        this.el.setAttribute("data-"+k, v)
+        this.el.setAttribute("data-state-"+k, v)
       }
 
-       log("State", state)
+      log("Updating state", e.detail)
     }
 
     window.addEventListener("phx:set-state", this.handleSetAttribute)

@@ -67,7 +67,7 @@ export default WindowDragEvents = {
     this.handleDragEnter = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (state.allowUploads) return;
+      if (!state.allow_uploads) return;
       dragsStack++;
 
       if (dragsStack == 1) {
@@ -79,7 +79,7 @@ export default WindowDragEvents = {
     this.handleDragLeave = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (state.allowUploads) return;
+      if (!state.allow_uploads) return;
       dragsStack--;
 
       if (dragsStack == 0) {
@@ -96,12 +96,12 @@ export default WindowDragEvents = {
     this.handleDrop = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (state.allowUploads) return;
+      if (!state.allow_uploads) return;
       log("drop", "#"+this.el.id)
       
       // The drag event has ended.
       this.el.setAttribute("data-dragging", "false");
-      drags= 0;
+      dragsStack = 0;
 
       const entries = event.dataTransfer.items;
       for (let i = 0; i < entries.length; i++) {

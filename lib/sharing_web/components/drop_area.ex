@@ -21,7 +21,9 @@ defmodule SharingWeb.DropArea do
     <div>
       <button
         type="submit"
-        class={@class <> " not-has-uploads:sr-only"}>
+        class={@class <> " not-has-uploads:sr-only"}
+        phx-click="submit-files"
+      >
         <span class={@icon} />
       </button>
       <div class={@class <> " has-uploads:sr-only"}>
@@ -52,6 +54,7 @@ defmodule SharingWeb.DropArea do
 
   attr(:input, :string)
   attr(:class, :string, default: "")
+  attr(:code, :string)
 
   def render(assigns) do
     ~H"""
@@ -60,17 +63,23 @@ defmodule SharingWeb.DropArea do
       id="drop-area"
       phx-hook="MouseEvents"
       class={
-        "grid rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)]"
-        <> " dark:bg-elevated"
+        "relative rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] overflow-hidden"
+        <> " not-code:h-44 not-code:w-2/3 not-code:max-w-md"
+        <> " code:size-fit"
+        <> " transition-[width] duration-300"
+        <> " dark:bg-elevated allow-uploads:cursor-pointer"
         <> " " <> @class}>
       <div class={
-        "m-4 center-content transition" 
+        "code:sr-only center-content transition absolute left-4 right-4 top-4 bottom-4" 
         <> " border-2 border-transparent rounded-[9px] border-dashed"
         <> " hovering:border-overlay hovering:bg-elevated"
         <> " dragging:border-salient dragging:bg-salient/10"
       }>
         <.content />
-      </div>  
+      </div>
+      <div class="center-content not-code:sr-only w-full h-full">
+        <img id="qr-code" class="opacity-0 transition dark:invert" />
+      </div>
     </label>
     """
   end

@@ -50,6 +50,7 @@ defmodule SharingWeb do
     quote do
       use Phoenix.LiveView
       alias SharingWeb.State
+      import SharingWeb.Helpers
 
       unquote(html_helpers())
     end
