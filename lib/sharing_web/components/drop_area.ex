@@ -49,36 +49,42 @@ defmodule SharingWeb.DropArea do
 
   attr(:input, :string)
   attr(:has_uploads, :boolean, default: true)
+  # use to inject <.live_file_input />
+  slot(:inner_block, required: true)
 
+  # The drop area morphs into the qr code when the files have been
+  # uploaded. This follows the same sliding doors principle as the
+  # action button.
   def render(assigns) do
     ~H"""
-    <label
-      for={@input}
+    <form
       id="drop-area"
       phx-hook="MouseEvents"
-      class={
-        "relative rounded-xl shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] overflow-hidden"
-        <> " transition-[width] duration-300"
-        <> " h-44 w-2/3 max-w-md"
-        <> " dark:bg-elevated"
-        <> " allow-uploads:cursor-pointer"}>
-      <div class={
-        "center-content absolute left-4 right-4 top-4 bottom-4"
-        <> " border-2 border-transparent rounded-[9px] border-dashed"
-        <> " transition"
-        <> " hovering:border-overlay hovering:bg-elevated"
-        <> " dragging:border-salient dragging:bg-salient/10"}>
-        <button
-          :if={@has_uploads}
-          type="submit"
-          phx-click="submit-files">
-          <.symbol />
-        </button>
-        <.symbol :if={!@has_uploads} />
-        <p class="text-sm mb-1.5 font-medium">Upload files</p>
-        <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
-      </div>
-    </label>
+      class="w-full h-full allow-uploads:cursor-pointer p-4"
+      phx-submit="upload"
+      phx-change="validate">
+      <label
+        for={@input}
+        <!-- Use padding to configure the size of the drop area. -->
+        <div class={
+          "center-content transition w-full h-full px-10"
+          <> " allow-uploads:cursor-pointer"
+          <> " border-2 border-transparent rounded-[9px] border-dashed"
+          <> " hovering:border-overlay hovering:bg-elevated"
+          <> " dragging:border-salient dragging:bg-salient/10"}>
+          <button
+            :if={@has_uploads}
+            type="submit"
+            phx-click="submit-files">
+            <.symbol />
+          </button>
+          <.symbol :if={!@has_uploads} />
+          <p class="text-sm mb-1.5 font-medium">Upload files</p>
+          <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
+        </div>
+      </label>
+      <%= render_slot(@inner_block) %>
+    </form>
     """
   end
 end

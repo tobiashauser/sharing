@@ -7,6 +7,7 @@ defmodule SharingWeb.Index do
   alias SharingWeb.Info
   alias SharingWeb.ItemCard
   alias SharingWeb.QRCode
+  alias SharingWeb.OmniArea
 
   def mount(params, session, socket) do
     petname = petname()
@@ -235,33 +236,24 @@ defmodule SharingWeb.Index do
   def render(assigns) do
     ~H"""
     <.hooks has_uploads={!Enum.empty?(@uploads.files.entries)} >
-      <div class="flex flex-col">
+      <div class="flex flex-col gap-6">
         <div class="flex justify-between">
           <ActionButton.render petname={@petname} />
           <Info.render />
         </div>
-        <!-- Specing below the navigation bar. -->
-        <div class="mt-6 mb-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]" />
-        <!-- Drop Area -->
-        <form
-          class="code:sr-only transition"
-          phx-submit="upload"
-          phx-change="validate">
-          <div class="flex justify-center">
-            <DropArea.render
-              input={@uploads.files.ref}
-              has_uploads={!Enum.empty?(@uploads.files.entries)}
+
+        <!-- Omni Area -->
+        <div class="flex justify-center min-h-44 mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
+          <OmniArea.render
+            input={@uploads.files.ref}
+            has_uploads={!Enum.empty?(@uploads.files.entries)}>
+            <.live_file_input
+              class="sr-only"
+              upload={@uploads.files}
             />
-          </div>
-          <.live_file_input
-            class="sr-only"
-            upload={@uploads.files}
-          />
-        </form>
-        <!-- QR Code -->
-        <div :if={@code} class="center-content">
-          <QRCode.render />
+          </OmniArea.render>
         </div>
+        
         <!-- Item Cards -->
         <div class={
           "mt-6 grid justify-center-safe gap-2 snap-mandatory auto-cols-[minmax(300px,400px)]"

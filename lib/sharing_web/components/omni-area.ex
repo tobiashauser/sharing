@@ -1,0 +1,31 @@
+defmodule SharingWeb.OmniArea do
+  use SharingWeb, :html
+  alias SharingWeb.DropArea
+  alias SharingWeb.QRCode
+
+  attr(:input, :string)
+  attr(:has_uploads, :boolean, default: true)
+  slot(:inner_block, required: true)
+
+  def render(assigns) do
+    ~H"""
+    <div class={"flex justify-center items-center rounded-xl shadow-aurora overflow-hidden"
+      <> " dark:bg-elevated"}>
+      <div
+        id="drop-area-container"
+        class="h-full center-content" >
+        <DropArea.render
+          input={@input}
+          has_uploads={@has_uploads}>
+          <%= render_slot(@inner_block) %>
+      </DropArea.render>
+      </div>
+      <div
+        id="qr-code-container"
+        class="w-0">
+        <QRCode.render />
+      </div>
+    </div>
+    """
+  end
+end

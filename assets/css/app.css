@@ -67,3 +67,7 @@
 .center-content {
   @apply flex flex-col items-center justify-center
 }
+
+.shadow-aurora {
+  @apply shadow-[0px_0px_15px_3px_rgba(0,0,0,0.1)] 
+}
