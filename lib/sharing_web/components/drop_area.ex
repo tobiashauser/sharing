@@ -58,29 +58,27 @@ defmodule SharingWeb.DropArea do
   def render(assigns) do
     ~H"""
     <form
-      id="drop-area"
-      phx-hook="MouseEvents"
-      class="w-full h-full allow-uploads:cursor-pointer p-4"
+      class="h-full w-full"
       phx-submit="upload"
       phx-change="validate">
-      <label
-        for={@input}
-        <!-- Use padding to configure the size of the drop area. -->
-        <div class={
-          "center-content transition w-full h-full px-10"
-          <> " allow-uploads:cursor-pointer"
-          <> " border-2 border-transparent rounded-[9px] border-dashed"
-          <> " hovering:border-overlay hovering:bg-elevated"
-          <> " dragging:border-salient dragging:bg-salient/10"}>
-          <button
-            :if={@has_uploads}
-            type="submit"
-            phx-click="submit-files">
-            <.symbol />
-          </button>
-          <.symbol :if={!@has_uploads} />
-          <p class="text-sm mb-1.5 font-medium">Upload files</p>
-          <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
+      <label for={@input} class="allow-uploads:cursor-pointer h-full w-full">
+        <div class="p-4 h-full w-full">
+          <div class={
+            "center-content transition h-full w-full"
+            <> " allow-uploads:cursor-pointer"
+            <> " border-2 border-transparent rounded-[9px] border-dashed"
+            <> " hovering:border-overlay hovering:bg-elevated"
+            <> " dragging:border-salient dragging:bg-salient/10"}>
+            <button
+              :if={@has_uploads}
+              type="submit"
+              phx-click="submit-files">
+              <.symbol />
+            </button>
+            <.symbol :if={!@has_uploads} />
+            <p class="text-sm mb-1.5 font-medium">Upload files</p>
+            <p class="text-subtle text-xs">Drag & Drop or click to browse</p>
+          </div>
         </div>
       </label>
       <%= render_slot(@inner_block) %>

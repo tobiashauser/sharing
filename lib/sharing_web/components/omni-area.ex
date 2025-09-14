@@ -9,20 +9,23 @@ defmodule SharingWeb.OmniArea do
 
   def render(assigns) do
     ~H"""
-    <div class={"flex justify-center items-center rounded-xl shadow-aurora overflow-hidden"
-      <> " dark:bg-elevated"}>
+    <div
+      id="omni-area"
+      phx-hook="OmniAreaEvents"
+      class={"grid shadow-aurora rounded-xl overflow-hidden"
+        <> " h-[12rem] w-2/3 max-w-sm sm:max-w-md"
+        <> " dark:bg-elevated"}>
       <div
         id="drop-area-container"
-        class="h-full center-content" >
-        <DropArea.render
-          input={@input}
-          has_uploads={@has_uploads}>
+        phx-hook="MouseEvents"
+        class="center-content col-start-1 row-start-1 z-2 h-[12rem]">
+        <DropArea.render input={@input} has_uploads={@has_uploads}>
           <%= render_slot(@inner_block) %>
-      </DropArea.render>
+        </DropArea.render>
       </div>
       <div
         id="qr-code-container"
-        class="w-0">
+        class="center-content col-start-1 row-start-1 z-1">
         <QRCode.render />
       </div>
     </div>

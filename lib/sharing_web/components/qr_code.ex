@@ -3,14 +3,11 @@ defmodule SharingWeb.QRCode do
 
   def render(assigns) do
     ~H"""
-    <div class= "p-4 bg-white">
-      <img
-        id="qr-code"
-        class="object-fit"
-        phx-hook="QRCodeEvents"
-        src="/store/test-pet.svg"
-      />
-    </div>
+    <img
+      id="qr-code"
+      class="object-contain opacity-0 invisible p-4 bg-white"
+      phx-hook="QRCodeEvents"
+    />
     """
   end
 end

@@ -30,6 +30,7 @@ import ActionButtonEvents from "./action-button-events"
 import GsapEvents from "./gsap"
 import KeyEvents from "./key-events"
 import MouseEvents from "./mouse-events"
+import OmniAreaEvents from "./omni-area-events"
 import QRCodeEvents from "./qr-code-events"
 import WindowDragEvents from "./drag-and-drop"
 import { StateEvents } from "./state"
@@ -45,6 +46,7 @@ const liveSocket = new LiveSocket("/live", Socket, {
     KeyEvents,
     MouseEvents,
     QRCodeEvents,
+    OmniAreaEvents,
     StateEvents,
     WindowDragEvents,
   },

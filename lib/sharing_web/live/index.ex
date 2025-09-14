@@ -111,6 +111,26 @@ defmodule SharingWeb.Index do
     end
   end
 
+  ### Omni Area -------------------------------------------
+
+  def handle_event("oa-show-code", _params, socket) do
+    {
+      :noreply,
+      socket
+      |> push_event("oa-show-code", %{})
+      |> State.set(code: true)
+    }
+  end
+
+  def handle_event("oa-show-drop-area", _params, socket) do
+    {
+      :noreply,
+      socket
+      |> push_event("oa-show-drop-area", %{})
+      |> State.set(code: false)
+    }
+  end
+
   ### File Uploads ----------------------------------------
 
   def handle_event("open-file-picker", _params, socket) do
@@ -199,6 +219,7 @@ defmodule SharingWeb.Index do
       |> push_event("inject-src", %{src: "/store/" <> socket.assigns.petname <> ".svg"})
       |> update(:uploaded_files, &(&1 ++ uploaded_files))
       |> push_event("ab-show-code", %{code: socket.assigns.petname})
+      |> push_event("oa-show-code", %{})
     }
   end
 
@@ -243,7 +264,7 @@ defmodule SharingWeb.Index do
         </div>
 
         <!-- Omni Area -->
-        <div class="flex justify-center min-h-44 mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
+        <div class="flex justify-center mt-[min(max(100vw,40rem)-40rem,max(100vh,40rem)-40rem,10vh)]">
           <OmniArea.render
             input={@uploads.files.ref}
             has_uploads={!Enum.empty?(@uploads.files.entries)}>
@@ -252,8 +273,8 @@ defmodule SharingWeb.Index do
               upload={@uploads.files}
             />
           </OmniArea.render>
-        </div>
-        
+          </div>
+
         <!-- Item Cards -->
         <div class={
           "mt-6 grid justify-center-safe gap-2 snap-mandatory auto-cols-[minmax(300px,400px)]"
