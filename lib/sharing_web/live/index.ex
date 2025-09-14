@@ -1,15 +1,12 @@
 defmodule SharingWeb.Index do
-  alias SharingWeb.ServeArchiveController
   use SharingWeb, :live_view
 
   alias SharingWeb.ActionButton
-  alias SharingWeb.DropArea
   alias SharingWeb.Info
   alias SharingWeb.ItemCard
-  alias SharingWeb.QRCode
   alias SharingWeb.OmniArea
 
-  def mount(params, session, socket) do
+  def mount(_params, _session, socket) do
     petname = petname()
 
     {
