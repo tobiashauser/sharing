@@ -82,7 +82,7 @@
         };
 
         # Create a module.
-        nixosModule = { config, lib, ... }: let
+        nixosModules.default = { config, lib, ... }: let
           cfg = config.services.sharing;
         in {
           options.services.sharing = with lib; {
@@ -91,12 +91,12 @@
             port = lib.mkOption {
               type = lib.types.port;
               default = 4000;
-              description = "Port to listen on, 4000 by default";
+              description = "Port to listen on, 4000 by default.";
             };
 
             secretKeyBaseFile = lib.mkOption {
               type = lib.types.path;
-              description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store";
+              description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store.";
             };
 
             host = lib.mkOption {
