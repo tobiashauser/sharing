@@ -29,7 +29,7 @@ defmodule SharingWeb.Info do
       phx-click={show_modal()}>
       <span class="hero-information-circle-solid size-4" />
       <.modal id="info-modal">
-        This is a modal.
+        TODO some docs...
       </.modal>
     </div>
     """
