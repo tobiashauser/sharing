@@ -185,7 +185,9 @@
               # Home is needed to connect to the node with iex.
               HOME = "${cfg.dataDir}";
               PORT = toString cfg.port;
-              PATH = "${config.systemd.services.sharing.serviceConfig.Path}:$PATH";
+              # This is needed for the elixir runtime to pick
+              # everything up.
+              PATH = "${lib.makeBinPath [ pkgs.rust-petname pkgs.qrrs ]}:$PATH";
             };
           };
 
