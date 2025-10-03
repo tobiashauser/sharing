@@ -87,10 +87,27 @@
       in {
         options.services.sharing = with lib; {
           enable = mkEnableOption "sharing";
+
+          user = mkOption {
+            description = "The user which runs the service.";
+            type = types.str;
+            default = "sharing";
+          };
+
+          group = mkOption {
+            description = "The group the user belongs to.";
+            type = types.str;
+            default = config.services.sharing.user;
+          };
         };
 
         config = lib.mkIf cfg.enable {
-
+          # Create a new user.
+          users.users.${cfg.user} = {
+            isSystemUser = true;
+            group = cfg.group;
+          };
+          users.groups.${cfg.group} = {};
         };
       };
     };
