@@ -49,7 +49,7 @@
 
         # Provide a package. This follows the tutorial at
         # https://www.curiosum.com/blog/packaging-elixir-application-with-nix.
-        packages = let
+        packages.default = let
           version = "0.1.0";    # synchronize with mix.exs
           src = ./.;
           mixFodDeps = erlangPackages.fetchMixDeps {
@@ -65,20 +65,21 @@
             x86_64-darwin = "macos-x64";
             x86_64-linux = "linux-x64";
           }.${system};
-        in {
-          default = erlangPackages.mixRelease {
-            inherit version src mixFodDeps;
-            pname = "sharing";
+        in erlangPackages.mixRelease {
+          inherit version src mixFodDeps;
+          pname = "sharing";
 
-            preInstall = ''
-              ln -s ${pkgs.tailwindcss_4}/bin/tailwindcss _build/tailwind-${translatedPlatform}
-              ln -s ${pkgs.esbuild}/bin/esbuild _build/esbuild-${translatedPlatform}
+          preInstall = ''
+            ln -s ${pkgs.tailwindcss_4}/bin/tailwindcss _build/tailwind-${translatedPlatform}
+            ln -s ${pkgs.esbuild}/bin/esbuild _build/esbuild-${translatedPlatform}
 
-              ${elixir}/bin/mix assets.deploy
-              ${elixir}/bin/mix phx.gen.release
-            '';
-          };
+            ${elixir}/bin/mix assets.deploy
+            ${elixir}/bin/mix phx.gen.release
+          '';
         };
+
+        # Create a service for deployment on nixOS.
+        nixosModules.default = {};
       }
     );
 }
