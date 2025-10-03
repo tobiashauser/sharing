@@ -169,10 +169,10 @@
                 "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
               ];
               Restart = "on-failure";
-              Path = lib.makeBinPath [
+              PATH = lib.makeBinPath [
                 pkgs.rust-petname
                 pkgs.qrrs
-              ];
+              ] + ":$PATH";
             };
 
             environment = {
@@ -187,7 +187,10 @@
               PORT = toString cfg.port;
               # This is needed for the elixir runtime to pick
               # everything up.
-              # PATH = "${lib.makeBinPath [ pkgs.rust-petname pkgs.qrrs ]}:$PATH";
+              PATH = lib.makeBinPath [
+                pkgs.rust-petname
+                pkgs.qrrs
+              ] + ":$PATH";
             };
           };
 
