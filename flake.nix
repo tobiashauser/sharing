@@ -125,7 +125,7 @@
 
           secretKeyBaseFile = lib.mkOption {
             type = lib.types.path;
-            description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store";
+            description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store.";
           };
         };
 
