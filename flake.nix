@@ -187,10 +187,6 @@
               PORT = toString cfg.port;
               # This is needed for the elixir runtime to pick
               # everything up.
-              PATH = lib.makeBinPath [
-                pkgs.rust-petname
-                pkgs.qrrs
-              ] + ":$PATH";
             };
           };
 
