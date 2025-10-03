@@ -20,10 +20,6 @@ if System.get_env("PHX_SERVER") do
   config :sharing, SharingWeb.Endpoint, server: true
 end
 
-# Inject the location of the data directory with an environment
-# variable.
-config :sharing, :data_dir, System.get_env("PHX_DATA_DIR")
-
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
@@ -43,13 +39,13 @@ if config_env() == :prod do
   config :sharing, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :sharing, SharingWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
+    url: [host: host, port: port, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
       # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      ip: :loopback,
       port: port
     ],
     secret_key_base: secret_key_base

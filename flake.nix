@@ -99,6 +99,29 @@
             type = types.str;
             default = config.services.sharing.user;
           };
+
+          host = mkOption {
+            description = "The adress of the webserver (regardless always on localhost).";
+            type = with types; nullOr str;
+            default = null;
+          };
+
+          port = mkOption {
+            description = "The port on which the application runs.";
+            type = types.number;
+            default = 4000;
+          };
+
+          dataDir = mkOption {
+            description = "The path to the directory where the uploads are stored.";
+            type = with types; nullOr str;
+            default = null;
+          };
+
+          package = mkOption {
+            description = "Connect to the default package output.";
+            type = types.package;
+          };
         };
 
         config = lib.mkIf cfg.enable {
@@ -108,6 +131,25 @@
             group = cfg.group;
           };
           users.groups.${cfg.group} = {};
+
+          systemd.services.sharing = {
+            description = "A simple file sharing server.";
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network.target" ];
+
+            serviceConfig = {
+              User = cfg.user;
+              Group = cfg.group;
+              WorkingDirectory = cfg.dataDir;
+              ExecStart = "${cfg.package}/bin/server";
+              Restart = "always";
+            };
+
+            environment = {
+              PHX_HOST = cfg.host;
+              PORT = toString cfg.port;
+            };
+          };
         };
       };
     };
