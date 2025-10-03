@@ -87,6 +87,8 @@
       in {
         options.services.sharing = with lib; {
           enable = mkEnableOption "sharing";
+          enableNginx = mkEnableOption "sharing-nginx";
+          enableSSL = mkEnableOption "sharing-ssl";
 
           user = mkOption {
             description = "The user which runs the service.";
@@ -127,6 +129,11 @@
             type = lib.types.path;
             description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store.";
           };
+
+          address = mkOption {
+            description = "The URL for the server.";
+            type = types.str;
+          };
         };
 
         config = lib.mkIf cfg.enable {
@@ -161,7 +168,7 @@
               LoadCredential = [
                 "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
               ];
-              # Restart = "on-failure";
+              Restart = "on-failure";
             };
 
             environment = {
@@ -175,6 +182,28 @@
               HOME = "${cfg.dataDir}";
               PORT = toString cfg.port;
             };
+          };
+
+          # A sample configuration for nginx.
+          services.nginx = {
+            enable = cfg.enableNginx;
+            virtualHosts.sharing = {
+              serverName = cfg.address;
+              locations."/" = {
+                proxyPass = "http://${cfg.host}:${toString cfg.port}";
+                recommendedProxySettings = true;
+              };
+            } // (if cfg.enableSSL then {
+              enableACME = true;
+              forceSSL = true;
+            } else { });
+          };
+
+          # We must configure the firewall to open ports 80 and 443.
+          networking.firewall = {
+            enable = true;
+            # Port 80 needs to stay open to get ssl certificates.
+            allowedTCPPorts = [ 80 443 ];
           };
         };
       };
