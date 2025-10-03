@@ -185,7 +185,7 @@
               # Home is needed to connect to the node with iex.
               HOME = "${cfg.dataDir}";
               PORT = toString cfg.port;
-              PATH = "${cfg.systemd.services.sharing.serviceConfig.Path}:$PATH";
+              PATH = "${config.systemd.services.sharing.serviceConfig.Path}:$PATH";
             };
           };
 
