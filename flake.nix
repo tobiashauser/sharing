@@ -77,11 +77,13 @@
             ${elixir}/bin/mix phx.gen.release
           '';
         };
-
-        # Create a service for deployment on nixOS.
-        nixosModules.default = {};
       }
-    );
+    ) // {
+
+      # Create a service for deployment on nixOS. This is architecture
+      # independent (well, only nixOS by design).
+      nixosModules.default = {};
+    };
 }
 
 # Local Variables:
