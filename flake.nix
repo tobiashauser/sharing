@@ -171,7 +171,7 @@
               Restart = "on-failure";
               Path = lib.makeBinPath [
                 pkgs.rust-petname
-                pkgs.qrls
+                pkgs.qrrs
               ];
             };
 
