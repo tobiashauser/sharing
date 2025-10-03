@@ -11,6 +11,8 @@ defmodule SharingWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  @data_dir Application.compile_env(:sharing, :data_dir, Application.app_dir(:sharing, "store"))
+
   socket("/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
@@ -18,7 +20,7 @@ defmodule SharingWeb.Endpoint do
 
   plug(Plug.Static,
     at: "/store",
-    from: {:sharing, "store"},
+    from: @data_dir,
     gzip: not code_reloading?
   )
 

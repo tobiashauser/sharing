@@ -1,4 +1,6 @@
 defmodule SharingWeb.Helpers do
+  @data_dir Application.compile_env(:sharing, :data_dir, Application.app_dir(:sharing, "store"))
+
   @doc """
   Return the path to a sharing for the given petname.
   """
@@ -7,7 +9,7 @@ defmodule SharingWeb.Helpers do
   end
 
   def sharing(petname) do
-    Path.join(Application.app_dir(:sharing, "store"), petname)
+    Path.join(@data_dir, petname)
   end
 
   @doc """
