@@ -122,6 +122,11 @@
             description = "Connect to the default package output.";
             type = types.package;
           };
+
+          secretKeyBaseFile = lib.mkOption {
+            type = lib.types.path;
+            description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store";
+          };
         };
 
         config = lib.mkIf cfg.enable {
@@ -129,24 +134,45 @@
           users.users.${cfg.user} = {
             isSystemUser = true;
             group = cfg.group;
+            home = cfg.dataDir;
+            createHome = true;
           };
           users.groups.${cfg.group} = {};
 
           systemd.services.sharing = {
-            description = "A simple file sharing server.";
+            description = "Sharing";
             wantedBy = [ "multi-user.target" ];
             after = [ "network.target" ];
+
+            script = ''
+              # Elixir does not start up if `RELEASE_COOKIE` is not set,
+              # even though we set `RELEASE_DISTRIBUTION=none` so the cookie should be unused.
+              # Thus, make a random one, which should then be ignored.
+              export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
+              export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
+    
+              ${cfg.package}/bin/server
+            '';
 
             serviceConfig = {
               User = cfg.user;
               Group = cfg.group;
               WorkingDirectory = cfg.dataDir;
-              ExecStart = "${cfg.package}/bin/server";
-              Restart = "always";
+              LoadCredential = [
+                "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
+              ];
+              # Restart = "on-failure";
             };
 
             environment = {
               PHX_HOST = cfg.host;
+              # Disable Erlang's distributed features.
+              RELEASE_DISTRIBUTION = "none";
+              # Additional safeguard, in case `RELEASE_DISTRIBUTION=none` ever
+              # stops disabling the start of EPMD.
+              ERL_EPMD_ADDRESS = "127.0.0.1";
+              # Home is needed to connect to the node with iex.
+              HOME = "${cfg.dataDir}";
               PORT = toString cfg.port;
             };
           };
