@@ -82,7 +82,17 @@
 
       # Create a service for deployment on nixOS. This is architecture
       # independent (well, only nixOS by design).
-      nixosModules.default = {};
+      nixosModules.default = { config, lib, ...}: let
+        cfg = config.services.sharing;
+      in {
+        options.services.sharing = with lib; {
+          enable = mkEnableOption "sharing";
+        };
+
+        config = lib.mkIf cfg.enable {
+
+        };
+      };
     };
 }
 
