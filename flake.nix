@@ -82,7 +82,7 @@
 
       # Create a service for deployment on nixOS. This is architecture
       # independent (well, only nixOS by design).
-      nixosModules.default = { config, lib, ...}: let
+      nixosModules.default = { config, lib, pkgs, ...}: let
         cfg = config.services.sharing;
       in {
         options.services.sharing = with lib; {
@@ -103,7 +103,7 @@
           };
 
           host = mkOption {
-            description = "The adress of the webserver (regardless always on localhost).";
+            description = "The address of the webserver (regardless always on localhost).";
             type = with types; nullOr str;
             default = null;
           };
@@ -169,6 +169,10 @@
                 "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
               ];
               Restart = "on-failure";
+              Path = lib.makeBinPath [
+                pkgs.rust-petname
+                pkgs.qrls
+              ];
             };
 
             environment = {
