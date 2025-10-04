@@ -179,7 +179,7 @@
             };
 
             environment = {
-              PHX_HOST = cfg.host;
+              PHX_HOST = cfg.address;
               # Disable Erlang's distributed features.
               RELEASE_DISTRIBUTION = "none";
               # Additional safeguard, in case `RELEASE_DISTRIBUTION=none` ever
