@@ -7,6 +7,7 @@ defmodule SharingWeb.Helpers do
   end
 
   def sharing(petname) do
+    dbg(File.cwd!())
     Path.join([File.cwd!(), "store", petname])
   end
 
