@@ -18,7 +18,7 @@ defmodule SharingWeb.Endpoint do
 
   plug(Plug.Static,
     at: "/store",
-    from: Application.compile_env(:sharing, :data_dir),
+    from: Application.get_env(:sharing, :data_dir),
     gzip: not code_reloading?
   )
 

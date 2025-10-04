@@ -69,12 +69,6 @@
           inherit version src mixFodDeps;
           pname = "sharing";
 
-          # A default directory where to store the uploaded files.
-          dataDir = "_store";
-          preBuild = ''
-            export SHARING_DATA_DIR="${dataDir}"
-          '';
-
           preInstall = ''
             ln -s ${pkgs.tailwindcss_4}/bin/tailwindcss _build/tailwind-${translatedPlatform}
             ln -s ${pkgs.esbuild}/bin/esbuild _build/esbuild-${translatedPlatform}
@@ -147,11 +141,7 @@
           };
         };
 
-        config = lib.mkIf cfg.enable (let
-          sharing = cfg.package.overrideAttrs (finalAttrs: prevAttrs: {
-            dataDir = cfg.dataDir;
-          });
-        in {
+        config = lib.mkIf cfg.enable {
           # Create a new user.
           users.users.${cfg.user} = {
             isSystemUser = true;
@@ -167,15 +157,11 @@
             after = [ "network.target" ];
 
             script = ''
-              # Elixir does not start up if `RELEASE_COOKIE` is not set,
-              # even though we set `RELEASE_DISTRIBUTION=none` so the cookie should be unused.
-              # Thus, make a random one, which should then be ignored.
-              # export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
               export RELEASE_COOKIE="$(< $CREDENTIALS_DIRECTORY/RELEASE_COOKIE )"
               export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
               export SHARING_DATA_DIR="${cfg.dataDir}"
     
-              ${sharing}/bin/server
+              ${cfg.package}/bin/server
             '';
 
             serviceConfig = {
@@ -224,11 +210,11 @@
             # Port 80 needs to stay open to get ssl certificates.
             allowedTCPPorts = [ 80 443 ];
           };
-        });
+        };
       };
     };
 }
 
-  # Local Variables:
-  # eval: (add-hook 'after-save-hook #'envrc-reload nil t)
-  # End:
+# Local Variables:
+# eval: (add-hook 'after-save-hook #'envrc-reload nil t)
+# End:
