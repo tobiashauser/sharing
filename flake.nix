@@ -130,6 +130,11 @@
             description = "A file containing the Phoenix Secret Key Base. This should be secret, and not kept in the nix store.";
           };
 
+          releaseCookieFile = lib.mkOption {
+            type = lib.types.path;
+            description = "A file containing a release cookie. This should be secret, and not kept in the nix store.";
+          };
+
           address = mkOption {
             description = "The URL for the server.";
             type = types.str;
@@ -156,6 +161,7 @@
               # even though we set `RELEASE_DISTRIBUTION=none` so the cookie should be unused.
               # Thus, make a random one, which should then be ignored.
               # export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
+              export RELEASE_COOKIE="$(< $CREDENTIALS_DIRECTORY/RELEASE_COOKIE )"
               export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
     
               ${cfg.package}/bin/server
@@ -167,6 +173,7 @@
               WorkingDirectory = cfg.dataDir;
               LoadCredential = [
                 "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
+                "RELEASE_COOKIE:${cfg.releaseCookieFile}"
               ];
               Restart = "on-failure";
             };
