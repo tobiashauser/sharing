@@ -18,7 +18,7 @@ defmodule SharingWeb.Endpoint do
 
   plug(Plug.Static,
     at: "/store",
-    from: Path.expand("./store"),
+    from: Path.join(File.cwd!(), "store"),
     gzip: not code_reloading?
   )
 

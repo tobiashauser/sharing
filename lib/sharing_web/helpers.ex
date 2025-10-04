@@ -7,7 +7,7 @@ defmodule SharingWeb.Helpers do
   end
 
   def sharing(petname) do
-    Path.join(Path.expand("./store"), petname)
+    Path.join([File.cwd!(), "store", petname])
   end
 
   @doc """
