@@ -82,7 +82,7 @@
 
       # Create a service for deployment on nixOS. This is architecture
       # independent (well, only nixOS by design).
-      nixosModules.default = { config, lib, pkgs, ...}: let
+      nixosModules.default = { config, lib, ...}: let
         cfg = config.services.sharing;
       in {
         options.services.sharing = with lib; {
@@ -163,6 +163,7 @@
               # export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
               export RELEASE_COOKIE="$(< $CREDENTIALS_DIRECTORY/RELEASE_COOKIE )"
               export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
+              export SHARING_DATA_DIR="${cfg.dataDir}"
     
               ${cfg.package}/bin/server
             '';
