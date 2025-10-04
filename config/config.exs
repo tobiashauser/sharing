@@ -10,6 +10,11 @@ import Config
 config :sharing,
   generators: [timestamp_type: :utc_datetime]
 
+# Configure a data directory.
+config :sharing,
+       :data_dir,
+       System.get_env("SHARING_DATA_DIR") || "_store"
+
 # Configures the endpoint
 config :sharing, SharingWeb.Endpoint,
   url: [host: "localhost"],

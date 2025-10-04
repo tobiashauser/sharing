@@ -7,8 +7,7 @@ defmodule SharingWeb.Helpers do
   end
 
   def sharing(petname) do
-    dbg(File.cwd!())
-    Path.join([File.cwd!(), "store", petname])
+    Path.join(Application.get_env(:sharing, :data_dir), petname)
   end
 
   @doc """

@@ -43,3 +43,4 @@ assets/node_modules/
 # Other ignores.
 .emacs.desktop*
 /result
+_store/
