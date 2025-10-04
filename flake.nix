@@ -55,7 +55,7 @@
           mixFodDeps = erlangPackages.fetchMixDeps {
             inherit version src;
             pname = "sharing-deps";
-            sha256 = "sha256-NEdvRaFXLQonuyFq95WTxUykjHs0Z1KHGGM6D/qSCuw=";
+            sha256 = "sha256-WF80osgi5lOwSXXJo5pbEl4tlJJT1CYXoiZ0+q879kw=";
             mixEnv = "prod";
           };
           translatedPlatform = {

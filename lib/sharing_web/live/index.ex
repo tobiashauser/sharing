@@ -67,18 +67,22 @@ defmodule SharingWeb.Index do
   end
 
   defp petname() do
-    {petname, 0} = System.cmd("petname", [])
-
-    petname
-    |> String.trim_trailing("\n")
+    UniqueNamesGenerator.generate(
+      [:adjectives, :animals],
+      %{style: :lowercase, separator: "-"}
+    )
   end
 
   defp qr_code(socket) do
-    # www.sharing.org/huge-dingo -> server handles with `ServeArchiveController'
+    # www.sharing.org/huge-dingo -> server handles with `ServeArchiveController'.
     url = socket.assigns.uri <> socket.assigns.petname
     output = code(socket)
+    settings = %QRCode.Render.SvgSettings{flatten: true, scale: 5}
 
-    System.cmd("qrrs", ["-m", "0", "-o", "svg", url, output])
+    url
+    |> QRCode.create(:high)
+    |> QRCode.render(:svg, settings)
+    |> QRCode.save(output)
 
     socket
     |> State.set(code: true)
