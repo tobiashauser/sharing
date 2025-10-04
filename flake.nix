@@ -155,7 +155,7 @@
               # Elixir does not start up if `RELEASE_COOKIE` is not set,
               # even though we set `RELEASE_DISTRIBUTION=none` so the cookie should be unused.
               # Thus, make a random one, which should then be ignored.
-              export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
+              # export RELEASE_COOKIE=$(tr -dc A-Za-z0-9 < /dev/urandom | head -c 20)
               export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
     
               ${cfg.package}/bin/server
@@ -169,10 +169,6 @@
                 "SECRET_KEY_BASE:${cfg.secretKeyBaseFile}"
               ];
               Restart = "on-failure";
-              PATH = lib.makeBinPath [
-                pkgs.rust-petname
-                pkgs.qrrs
-              ] + ":$PATH";
             };
 
             environment = {
@@ -185,8 +181,6 @@
               # Home is needed to connect to the node with iex.
               HOME = "${cfg.dataDir}";
               PORT = toString cfg.port;
-              # This is needed for the elixir runtime to pick
-              # everything up.
             };
           };
 
