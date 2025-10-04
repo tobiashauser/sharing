@@ -65,9 +65,15 @@
             x86_64-darwin = "macos-x64";
             x86_64-linux = "linux-x64";
           }.${system};
-        in erlangPackages.mixRelease {
+        in erlangPackages.mixRelease rec {
           inherit version src mixFodDeps;
           pname = "sharing";
+
+          # A default directory where to store the uploaded files.
+          dataDir = "_store";
+          preBuild = ''
+            export SHARING_DATA_DIR="${dataDir}"
+          '';
 
           preInstall = ''
             ln -s ${pkgs.tailwindcss_4}/bin/tailwindcss _build/tailwind-${translatedPlatform}
@@ -141,7 +147,11 @@
           };
         };
 
-        config = lib.mkIf cfg.enable {
+        config = lib.mkIf cfg.enable (let
+          sharing = cfg.package.overrideAttrs (finalAttrs: prevAttrs: {
+            dataDir = cfg.dataDir;
+          });
+        in {
           # Create a new user.
           users.users.${cfg.user} = {
             isSystemUser = true;
@@ -165,7 +175,7 @@
               export SECRET_KEY_BASE="$(< $CREDENTIALS_DIRECTORY/SECRET_KEY_BASE )"
               export SHARING_DATA_DIR="${cfg.dataDir}"
     
-              ${cfg.package}/bin/server
+              ${sharing}/bin/server
             '';
 
             serviceConfig = {
@@ -214,11 +224,11 @@
             # Port 80 needs to stay open to get ssl certificates.
             allowedTCPPorts = [ 80 443 ];
           };
-        };
+        });
       };
     };
 }
 
-# Local Variables:
-# eval: (add-hook 'after-save-hook #'envrc-reload nil t)
-# End:
+  # Local Variables:
+  # eval: (add-hook 'after-save-hook #'envrc-reload nil t)
+  # End:
